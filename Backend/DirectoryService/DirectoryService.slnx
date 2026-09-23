@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Core/Core.csproj" Id="4b316f18-a6a1-4a19-9f23-f609ff50684f" />
+    <Project Path="Domain/Domain.csproj" Id="af27bd0b-d6d6-4194-a321-6415029abcd6" />
+    <Project Path="Infrastructure.Postgres/Infrastructure.Postgres.csproj" Id="9842d57a-d304-4cf0-a139-84bd3567c3bd" />
+    <Project Path="src/Contracts/Contracts.csproj" />
+    <Project Path="Web/Web.csproj" Id="10c3c9ed-f19b-4ad6-aeaf-9db25b5869dd" />
+  </Folder>
+</Solution>
