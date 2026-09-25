@@ -4,8 +4,8 @@
     {
         public string Value { get; }
 
-        private const int _MIN_LENGHT = 2;
-        private const int _MAX_LENGHT = 50;
+        private const int _MIN_LENGTH = 2;
+        private const int _MAX_LENGTH = 50;
 
         private Name(string value)
         {
@@ -21,9 +21,9 @@
 
             var normalizedValue = value.Trim();
 
-            if (normalizedValue.Length < _MIN_LENGHT || normalizedValue.Length > _MAX_LENGHT)
+            if (normalizedValue.Length < _MIN_LENGTH || normalizedValue.Length > _MAX_LENGTH)
             {
-                throw new ArgumentException($"Name must be between {_MIN_LENGHT} and {_MAX_LENGHT} characters.", nameof(value));
+                throw new ArgumentException($"Name must be between {_MIN_LENGTH} and {_MAX_LENGTH} characters.", nameof(value));
             }
 
             return new Name(normalizedValue);
