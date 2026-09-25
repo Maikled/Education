@@ -6,7 +6,7 @@ namespace Domain.Entities.ValueObjects
     {
         public string Value { get; }
 
-        [GeneratedRegex(_REGEX_PATTERN)]
+        [GeneratedRegex(_REGEX_PATTERN, RegexOptions.CultureInvariant, 100)]
         private static partial Regex SlugPattern { get; }
         private const int _MIN_LENGTH = 2;
         private const int _MAX_LENGTH = 100;
@@ -24,7 +24,7 @@ namespace Domain.Entities.ValueObjects
                 throw new ArgumentNullException(nameof(value), "Slug cannot be null or empty.");
             }
 
-            var normalizedValue = value.Trim().ToUpperInvariant();
+            var normalizedValue = value.Trim().ToLowerInvariant();
 
             if (normalizedValue.Length < _MIN_LENGTH || normalizedValue.Length > _MAX_LENGTH)
             {
@@ -36,7 +36,7 @@ namespace Domain.Entities.ValueObjects
                 throw new ArgumentException("Slug must only contain lowercase letters, numbers, and hyphens, and cannot start or end with a hyphen.", nameof(value));
             }
 
-            return new Slug(value);
+            return new Slug(normalizedValue);
         }
     }
 }
