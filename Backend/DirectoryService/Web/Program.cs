@@ -1,3 +1,5 @@
+using Infrastructure.Postgres;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 namespace Web
@@ -10,6 +12,7 @@ namespace Web
 
             builder.Services.AddOpenApi();
             builder.Services.AddHealthChecks();
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
             var app = builder.Build();
 
