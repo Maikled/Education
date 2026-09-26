@@ -8,11 +8,20 @@ namespace Web
     {
         public static async Task Main(string[] args)
         {
+            DotEnv.Load();
+
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddOpenApi();
             builder.Services.AddHealthChecks();
-            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
+            
+            var connectionString = DotEnv.Expand(builder.Configuration.GetConnectionString("PostgresConnection") ?? string.Empty);
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException("Connection string 'PostgresConnection' is not set. ");
+            }
+
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
             var app = builder.Build();
 
