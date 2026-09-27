@@ -5,12 +5,14 @@ namespace Domain.Entities
     public class Location
     {
         public Guid Id { get; private set; }
-        public Name Name { get; private set; }
-        public Address Address { get; private set; }
+        public Name Name { get; private set; } = null!;
+        public Address Address { get; private set; } = null!;
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
 
-        private Location(Name name, Address address)
+        private Location() { } // Required by EF Core
+
+        private Location(Name name, Address address) : this()
         {
             Id = Guid.CreateVersion7();
             Name = name;
