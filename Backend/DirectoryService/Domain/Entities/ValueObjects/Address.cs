@@ -2,6 +2,8 @@
 {
     public record Address
     {
+        public const int MAX_LENGTH = 500;
+
         public string Country { get; }
         public string State { get; }
         public string City { get; }
@@ -19,28 +21,24 @@
 
         public static Address Create(string country, string state, string city, string street, string buildingNumber)
         {
-            if (string.IsNullOrEmpty(country))
+            return new Address(ValidateParameter(country, nameof(country)), ValidateParameter(state, nameof(state)), ValidateParameter(city, nameof(city)), ValidateParameter(street, nameof(street)), ValidateParameter(buildingNumber, nameof(buildingNumber)));
+        }
+
+        private static string ValidateParameter(string parameter, string parameterName)
+        {
+            if (string.IsNullOrEmpty(parameter))
             {
-                throw new ArgumentNullException(nameof(country), "Country cannot be null or empty.");
-            }
-            if (string.IsNullOrEmpty(state))
-            {
-                throw new ArgumentNullException(nameof(state), "State cannot be null or empty.");
-            }
-            if (string.IsNullOrEmpty(city))
-            {
-                throw new ArgumentNullException(nameof(city), "City cannot be null or empty.");
-            }
-            if (string.IsNullOrEmpty(street))
-            {
-                throw new ArgumentNullException(nameof(street), "Street cannot be null or empty.");
-            }
-            if (string.IsNullOrEmpty(buildingNumber))
-            {
-                throw new ArgumentNullException(nameof(buildingNumber), "Building number cannot be null or empty.");
+                throw new ArgumentNullException(parameterName, $"{parameterName} cannot be null or empty.");
             }
 
-            return new Address(country, state, city, street, buildingNumber);
+            var normalizedParameter = parameter.Trim();
+
+            if (normalizedParameter.Length > MAX_LENGTH)
+            {
+                throw new ArgumentOutOfRangeException(parameterName, $"{parameterName} exceeds the maximum length of {MAX_LENGTH} characters.");
+            }
+
+            return normalizedParameter;
         }
     }
 }
