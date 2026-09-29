@@ -1,6 +1,7 @@
 using Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Web.Providers;
 
 namespace Web
 {
@@ -24,6 +25,8 @@ namespace Web
             builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
             var app = builder.Build();
+
+            EndpointsProvider.RegisterAppEndpoints(app.MapGroup("/"));
 
             app.MapHealthChecks("/health");
 
