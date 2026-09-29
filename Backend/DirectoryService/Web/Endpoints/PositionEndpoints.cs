@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Web.Interfaces;
 
-namespace Web.Endpoints.Helpers
+namespace Web.Endpoints
 {
     internal sealed class PositionEndpoints : IEndpoint
     {
