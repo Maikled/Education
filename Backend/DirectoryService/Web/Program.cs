@@ -15,6 +15,7 @@ namespace Web
 
             builder.Services.AddOpenApi();
             builder.Services.AddHealthChecks();
+            builder.Services.AddWebServices();
             
             var connectionString = DotEnv.Expand(builder.Configuration.GetConnectionString("PostgresConnection") ?? string.Empty);
             if (string.IsNullOrWhiteSpace(connectionString))
@@ -34,6 +35,7 @@ namespace Web
             {
                 app.MapOpenApi();
                 app.MapScalarApiReference();
+                app.MapGet("/", () => Results.Redirect("/scalar"));
             }
 
             await app.RunAsync();
