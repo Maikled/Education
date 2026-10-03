@@ -1,5 +1,3 @@
-using Infrastructure.Postgres;
-using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Web.Providers;
 
@@ -9,21 +7,20 @@ namespace Web
     {
         public static async Task Main(string[] args)
         {
-            DotEnv.Load();
-
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddOpenApi();
-            builder.Services.AddHealthChecks();
-            builder.Services.AddWebServices();
-            
+            DotEnv.Load();
+
             var connectionString = DotEnv.Expand(builder.Configuration.GetConnectionString("PostgresConnection") ?? string.Empty);
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 throw new InvalidOperationException("Connection string 'PostgresConnection' is not set. ");
             }
 
-            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+            builder.Services.AddSingleton<ILoggerFactory>((_) => LoggerFactory.Create(loggingBuilder => loggingBuilder.AddConsole()));
+            builder.Services.AddOpenApi();
+            builder.Services.AddHealthChecks();
+            builder.Services.AddWebServices(connectionString);
 
             var app = builder.Build();
 
