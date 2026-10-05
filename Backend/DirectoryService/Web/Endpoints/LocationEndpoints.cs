@@ -1,4 +1,6 @@
 ﻿using Contracts.DTOs;
+using Core.Locations.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Web.Interfaces;
 
@@ -27,9 +29,21 @@ namespace Web.Endpoints
             return Results.NotFound();
         }
 
-        private static async Task<IResult> CreateAsync([FromBody] CreateLocationDto locationDto, CancellationToken cancellationToken)
+        private static async Task<IResult> CreateAsync([FromBody] CreateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
         {
-            return Results.Created();
+            try
+            {
+                var locationId = await locationsService.CreateLocationAsync(locationDto, cancellationToken);
+                return Results.Created($"/locations/{locationId}", locationId);
+            }
+            catch (ValidationException ex)
+            {
+                return Results.BadRequest(ex.Errors);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
         }
 
         private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateLocationDto locationDto, CancellationToken cancellationToken)
