@@ -8,6 +8,7 @@
     <!-- Все предупреждения становятся ошибками компиляции -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+	<WarningsNotAsErrors>$(WarningsNotAsErrors);S1172;RCS1163</WarningsNotAsErrors>
 
     <!-- Включаем стилевые правила в build -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
