@@ -21,7 +21,7 @@ namespace Infrastructure.Postgres.Locations.Repositories
         {
             try
             {
-                _dbContext.Locations.Add(location);
+                await _dbContext.Locations.AddAsync(location, cancellationToken);
                 await _dbContext.SaveChangesAsync(cancellationToken);
 
                 return location.Id;
@@ -36,6 +36,11 @@ namespace Infrastructure.Postgres.Locations.Repositories
         public async Task<bool> ExistWithNameAsync(Name name, CancellationToken cancellationToken)
         {
             return await _dbContext.Locations.Where(p => p.Name == name).AnyAsync(cancellationToken);
+        }
+
+        public async Task<bool> ExistById(Guid locationId, CancellationToken cancellationToken)
+        {
+            return await _dbContext.Locations.Where(p => p.Id == locationId).AnyAsync(cancellationToken);
         }
     }
 }

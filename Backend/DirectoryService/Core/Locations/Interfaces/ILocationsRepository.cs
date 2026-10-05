@@ -7,5 +7,6 @@ namespace Core.Locations.Interfaces
     {
         public Task<Guid> AddAsync(Location location, CancellationToken cancellationToken);
         public Task<bool> ExistWithNameAsync(Name name, CancellationToken cancellationToken);
+        public Task<bool> ExistById(Guid locationId, CancellationToken cancellationToken);
     }
 }

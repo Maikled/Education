@@ -1,4 +1,6 @@
 ﻿using Contracts.DTOs;
+using Core.Departments.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Web.Interfaces;
 
@@ -27,9 +29,21 @@ namespace Web.Endpoints
             return Results.NotFound();
         }
 
-        private static async Task<IResult> CreateAsync([FromBody] CreateDepartmentDto departmentDto, CancellationToken cancellationToken)
+        private static async Task<IResult> CreateAsync([FromBody] CreateDepartmentDto departmentDto, [FromServices] IDepartmentService departmentsService, CancellationToken cancellationToken)
         {
-            return Results.Created();
+            try
+            {
+                var departmentId = await departmentsService.CreateDepartmentAsync(departmentDto, cancellationToken);
+                return Results.Created($"/departments/{departmentId}", departmentId);
+            }
+            catch (ValidationException ex)
+            {
+                return Results.BadRequest(ex.Errors);
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
         }
 
         private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateDepartmentDto departmentDto, CancellationToken cancellationToken)
