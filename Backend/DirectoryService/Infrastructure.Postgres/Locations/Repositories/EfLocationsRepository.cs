@@ -42,5 +42,10 @@ namespace Infrastructure.Postgres.Locations.Repositories
         {
             return await _dbContext.Locations.Where(p => p.Id == locationId).AnyAsync(cancellationToken);
         }
+
+        public async Task<bool> ExistAll(IEnumerable<Guid> locationIds, CancellationToken cancellationToken)
+        {
+            return await _dbContext.Locations.AllAsync(p => locationIds.Contains(p.Id), cancellationToken);
+        }
     }
 }

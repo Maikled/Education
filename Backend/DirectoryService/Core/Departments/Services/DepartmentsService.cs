@@ -44,17 +44,11 @@ namespace Core.Departments.Services
 
             if (dto.locationsIds != null)
             {
-                List<DepartmentLocation> departmentLocations = new List<DepartmentLocation>();
-                foreach (var locationId in dto.locationsIds)
-                {
-                    var locationExists = await _locationsRepository.ExistById(locationId, cancellationToken);
-                    if (!locationExists)
-                        throw new InvalidOperationException($"Location with ID {locationId} does not exist.");
+                var locationsExists = await _locationsRepository.ExistAll(dto.locationsIds, cancellationToken);
+                if (!locationsExists)
+                    throw new InvalidOperationException($"One or more locations do not exist.");
 
-                    departmentLocations.Add(DepartmentLocation.Create(department.Id, locationId, !dto.ParentId.HasValue));
-                }
-
-                await _departmentsRepository.AddWithLocationsAsync(department, departmentLocations, cancellationToken);
+                await _departmentsRepository.AddWithLocationsAsync(department, dto.locationsIds.Select(p => DepartmentLocation.Create(department.Id, p, !dto.ParentId.HasValue)), cancellationToken);
             }
             else
             {
