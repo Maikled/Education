@@ -9,5 +9,7 @@ namespace Core.Locations.Interfaces
         public Task<bool> ExistWithNameAsync(Name name, CancellationToken cancellationToken);
         public Task<bool> ExistById(Guid locationId, CancellationToken cancellationToken);
         public Task<bool> ExistAll(IEnumerable<Guid> locationIds, CancellationToken cancellationToken);
+        public Task<Location?> GetByIdAsync(Guid locationId, CancellationToken cancellationToken);
+        public Task SaveChangesAsync(CancellationToken cancellationToken);
     }
 }

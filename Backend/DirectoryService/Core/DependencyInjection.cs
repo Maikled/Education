@@ -15,7 +15,9 @@ namespace Core
         public static IServiceCollection AddCoreServices(this IServiceCollection services)
         {
             services.AddScoped<IValidator<CreateLocationDto>, CreateLocationValidator>();
+            services.AddScoped<IValidator<UpdateLocationDto>, UpdateLocationValidator>();
             services.AddScoped<IValidator<CreateDepartmentDto>, CreateDepartmentValidator>();
+            services.AddScoped<IValidator<UpdateDepartmentDto>, UpdateDepatmentValidator>();
 
             services.AddScoped<ILocationsService, LocationsService>();
             services.AddScoped<IDepartmentService, DepartmentsService>();

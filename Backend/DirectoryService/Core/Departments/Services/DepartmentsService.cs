@@ -11,14 +11,18 @@ namespace Core.Departments.Services
     internal class DepartmentsService : IDepartmentService
     {
         private readonly IValidator<CreateDepartmentDto> _createDepartmentValidator;
+        private readonly IValidator<UpdateDepartmentDto> _updateDepartmentValidator;
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly ILocationsRepository _locationsRepository;
+        private readonly IDepartmentLocationsRepository _departmentLocationsRepository;
 
-        public DepartmentsService(IValidator<CreateDepartmentDto> createDepartmentValidator, IDepartmentsRepository departmentsRepository, ILocationsRepository locationsRepository)
+        public DepartmentsService(IValidator<CreateDepartmentDto> createDepartmentValidator, IValidator<UpdateDepartmentDto> updateDepartmentValidator, IDepartmentsRepository departmentsRepository, ILocationsRepository locationsRepository, IDepartmentLocationsRepository departmentLocationsRepository)
         {
             _createDepartmentValidator = createDepartmentValidator;
+            _updateDepartmentValidator = updateDepartmentValidator;
             _departmentsRepository = departmentsRepository;
             _locationsRepository = locationsRepository;
+            _departmentLocationsRepository = departmentLocationsRepository;
         }
 
         public async Task<Guid> CreateDepartmentAsync(CreateDepartmentDto dto, CancellationToken cancellationToken)
@@ -56,6 +60,48 @@ namespace Core.Departments.Services
             }
 
             return department.Id;
+        }
+
+        public async Task UpdateDepartmentAsync(Guid departmentId, UpdateDepartmentDto dto, CancellationToken cancellationToken)
+        {
+            var validationResult = await _updateDepartmentValidator.ValidateAsync(dto, cancellationToken);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
+            var existDeparment = await _departmentsRepository.GetByIdAsync(departmentId, cancellationToken);
+            if (existDeparment == null)
+                throw new InvalidOperationException($"Department with ID {departmentId} does not exist.");
+
+            var departmentSlug = Slug.Create(dto.Slug);
+            existDeparment.Update(Name.Create(dto.Name), departmentSlug, DepartmentPath.Create(departmentSlug), dto.ParentId);
+
+            await _departmentsRepository.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task AddLocationsAsync(Guid departmentId, Guid locationId, CancellationToken cancellationToken)
+        {
+            var departmentLocations = await _departmentLocationsRepository.GetAsync(departmentId, locationId, cancellationToken);
+            if (departmentLocations != null)
+            {
+                throw new InvalidOperationException($"Department location with IDs {departmentId} and {locationId} already exists.");
+            }
+
+            var departmentLocation = DepartmentLocation.Create(departmentId, locationId, false);
+
+            await _departmentLocationsRepository.AddAsync(departmentLocation, cancellationToken);
+            await _departmentLocationsRepository.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task RemoveLocationsAsync(Guid departmentId, Guid locationId, CancellationToken cancellationToken)
+        {
+            var departmentLocations = await _departmentLocationsRepository.GetAsync(departmentId, locationId, cancellationToken);
+            if (departmentLocations == null)
+            {
+                throw new InvalidOperationException($"Department location with IDs {departmentId} and {locationId} does not exist.");
+            }
+
+            await _departmentLocationsRepository.RemoveAsync(departmentLocations, cancellationToken);
+            await _departmentLocationsRepository.SaveChangesAsync(cancellationToken);
         }
     }
 }

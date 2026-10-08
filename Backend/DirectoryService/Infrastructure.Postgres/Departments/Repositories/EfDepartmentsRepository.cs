@@ -64,5 +64,10 @@ namespace Infrastructure.Postgres.Departments.Repositories
         {
             return await _dbContext.Departments.Where(p => p.Id == departmentId).FirstOrDefaultAsync(cancellationToken);
         }
+
+        public async Task SaveChangesAsync(CancellationToken cancellationToken)
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
     }
 }

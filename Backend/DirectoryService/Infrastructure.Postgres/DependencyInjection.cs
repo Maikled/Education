@@ -15,6 +15,7 @@ namespace Infrastructure.Postgres
 
             services.AddScoped<ILocationsRepository, EfLocationsRepository>();
             services.AddScoped<IDepartmentsRepository, EfDepartmentsRepository>();
+            services.AddScoped<IDepartmentLocationsRepository, EfDepartmentLocationsRepository>();
 
             //services.AddSingleton<DapperContextFactory>((options) => new DapperContextFactory(connectionString, options.GetRequiredService<ILoggerFactory>()));
             //services.AddScoped<ILocationsRepository, DapperLocationsRepository>();
