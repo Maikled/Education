@@ -9,11 +9,13 @@ namespace Core.Locations.Services
     internal sealed class LocationsService : ILocationsService
     {
         private readonly IValidator<CreateLocationDto> _createLocationValidator;
+        private readonly IValidator<UpdateLocationDto> _updateLocationValidator;
         private readonly ILocationsRepository _locationsRepository;
 
-        public LocationsService(IValidator<CreateLocationDto> createLocationValidator, ILocationsRepository locationsRepository)
+        public LocationsService(IValidator<CreateLocationDto> createLocationValidator, IValidator<UpdateLocationDto> updateLocationValidator, ILocationsRepository locationsRepository)
         {
             _createLocationValidator = createLocationValidator;
+            _updateLocationValidator = updateLocationValidator;
             _locationsRepository = locationsRepository;
         }
 
@@ -35,6 +37,21 @@ namespace Core.Locations.Services
             await _locationsRepository.AddAsync(location, cancellationToken);
 
             return location.Id;
+        }
+
+        public async Task UpdateLocationAsync(Guid locationId, UpdateLocationDto dto, CancellationToken cancellationToken)
+        {
+            var validationResult = await _updateLocationValidator.ValidateAsync(dto, cancellationToken);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
+            var existLocation = await _locationsRepository.GetByIdAsync(locationId, cancellationToken);
+            if (existLocation == null)
+                throw new InvalidOperationException($"Location with ID {locationId} does not exist.");
+
+            existLocation.Update(Name.Create(dto.Name), Address.Create(dto.Country, dto.State, dto.City, dto.Street, dto.BuildingNumber));
+
+            await _locationsRepository.SaveChangesAsync(cancellationToken);
         }
     }
 }

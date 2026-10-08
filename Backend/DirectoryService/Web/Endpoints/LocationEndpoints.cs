@@ -15,7 +15,7 @@ namespace Web.Endpoints
             group.MapPost("/", CreateAsync);
             group.MapGet("/", GetAllAsync);
             group.MapGet("/{id:guid}", GetByIdAsync);
-            group.MapPut("/{id:guid}", UpdateAsync);
+            group.MapPatch("/{id:guid}", UpdateAsync);
             group.MapDelete("/{id:guid}", DeleteAsync);
         }
 
@@ -46,9 +46,17 @@ namespace Web.Endpoints
             }
         }
 
-        private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateLocationDto locationDto, CancellationToken cancellationToken)
+        private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
         {
-            return Results.Ok();
+            try
+            {
+                await locationsService.UpdateLocationAsync(id, locationDto, cancellationToken);
+                return Results.Ok();
+            }
+            catch(Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
         }
 
         private static async Task<IResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)
