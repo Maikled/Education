@@ -73,13 +73,40 @@ namespace Core.Departments.Services
                 throw new InvalidOperationException($"Department with ID {departmentId} does not exist.");
 
             var departmentSlug = Slug.Create(dto.Slug);
-            existDeparment.Update(Name.Create(dto.Name), departmentSlug, DepartmentPath.Create(departmentSlug), dto.ParentId);
+
+            DepartmentPath departmentPath;
+            if (existDeparment.ParentId != null)
+            {
+                var parentDepartment = await _departmentsRepository.GetByIdAsync(existDeparment.ParentId.Value, cancellationToken);
+                if (parentDepartment == null)
+                    throw new InvalidOperationException($"Parent department with ID {existDeparment.ParentId} does not exist.");
+
+                departmentPath = parentDepartment.Path.AppendPath(departmentSlug);
+            }
+            else
+            {
+                departmentPath = DepartmentPath.Create(departmentSlug);
+            }
+            
+            existDeparment.Update(Name.Create(dto.Name), departmentSlug, departmentPath, dto.ParentId);
 
             await _departmentsRepository.SaveChangesAsync(cancellationToken);
         }
 
         public async Task AddLocationsAsync(Guid departmentId, Guid locationId, CancellationToken cancellationToken)
         {
+            var existDeparment = await _departmentsRepository.GetByIdAsync(departmentId, cancellationToken);
+            if (existDeparment == null)
+            {
+                throw new InvalidOperationException($"Department with ID {departmentId} does not exist.");
+            }
+
+            var existLocation = await _locationsRepository.GetByIdAsync(locationId, cancellationToken);
+            if (existLocation == null)
+            {
+                throw new InvalidOperationException($"Location with ID {locationId} does not exist.");
+            }
+
             var departmentLocations = await _departmentLocationsRepository.GetAsync(departmentId, locationId, cancellationToken);
             if (departmentLocations != null)
             {

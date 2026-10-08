@@ -45,7 +45,11 @@ namespace Infrastructure.Postgres.Locations.Repositories
 
         public async Task<bool> ExistAll(IEnumerable<Guid> locationIds, CancellationToken cancellationToken)
         {
-            return await _dbContext.Locations.AllAsync(p => locationIds.Contains(p.Id), cancellationToken);
+            var distinctLocationIds = locationIds.Distinct().ToList();
+
+            var countLocations = await _dbContext.Locations.CountAsync(p => locationIds.Contains(p.Id), cancellationToken);
+
+            return distinctLocationIds.Count == countLocations;
         }
 
         public async Task<Location?> GetByIdAsync(Guid locationId, CancellationToken cancellationToken)
