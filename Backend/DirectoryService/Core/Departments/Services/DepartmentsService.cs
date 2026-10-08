@@ -75,11 +75,17 @@ namespace Core.Departments.Services
             var departmentSlug = Slug.Create(dto.Slug);
 
             DepartmentPath departmentPath;
-            if (existDeparment.ParentId != null)
+            if (dto.ParentId.HasValue)
             {
-                var parentDepartment = await _departmentsRepository.GetByIdAsync(existDeparment.ParentId.Value, cancellationToken);
+                if (dto.ParentId.Value == departmentId)
+                    throw new InvalidOperationException("Department cannot be its own parent.");
+
+                var parentDepartment = await _departmentsRepository.GetByIdAsync(dto.ParentId.Value, cancellationToken);
                 if (parentDepartment == null)
-                    throw new InvalidOperationException($"Parent department with ID {existDeparment.ParentId} does not exist.");
+                    throw new InvalidOperationException($"Parent department with ID {dto.ParentId} does not exist.");
+
+                if (parentDepartment.Path.IsDescendantOf(existDeparment.Path))
+                    throw new InvalidOperationException($"Department with ID {dto.ParentId} is a descendant of department with ID {departmentId} and cannot be its parent.");
 
                 departmentPath = parentDepartment.Path.AppendPath(departmentSlug);
             }
