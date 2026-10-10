@@ -1,5 +1,6 @@
 ﻿using Core;
 using Infrastructure.Postgres;
+using Web.Middlewares;
 
 namespace Web
 {
@@ -9,6 +10,8 @@ namespace Web
         {
             services.AddCoreServices();
             services.AddInfrastructurePostgresServices(connectionString);
+
+            services.AddTransient<ExceptionHandlerMiddleware>();
 
             return services;
         }
