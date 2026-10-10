@@ -1,6 +1,5 @@
 ﻿using Contracts.DTOs;
 using Core.Locations.Interfaces;
-using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Web.Interfaces;
 
@@ -31,32 +30,14 @@ namespace Web.Endpoints
 
         private static async Task<IResult> CreateAsync([FromBody] CreateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
         {
-            try
-            {
-                var locationId = await locationsService.CreateLocationAsync(locationDto, cancellationToken);
-                return Results.Created($"/locations/{locationId}", locationId);
-            }
-            catch (ValidationException ex)
-            {
-                return Results.BadRequest(ex.Errors);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            var locationId = await locationsService.CreateLocationAsync(locationDto, cancellationToken);
+            return Results.Created($"/locations/{locationId}", locationId);
         }
 
         private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
         {
-            try
-            {
-                await locationsService.UpdateLocationAsync(id, locationDto, cancellationToken);
-                return Results.Ok();
-            }
-            catch(Exception ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            await locationsService.UpdateLocationAsync(id, locationDto, cancellationToken);
+            return Results.Ok();
         }
 
         private static async Task<IResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)

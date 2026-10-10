@@ -1,6 +1,5 @@
 ﻿using Contracts.DTOs;
 using Core.Departments.Interfaces;
-using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Web.Interfaces;
 
@@ -33,32 +32,14 @@ namespace Web.Endpoints
 
         private static async Task<IResult> CreateAsync([FromBody] CreateDepartmentDto departmentDto, [FromServices] IDepartmentService departmentsService, CancellationToken cancellationToken)
         {
-            try
-            {
-                var departmentId = await departmentsService.CreateDepartmentAsync(departmentDto, cancellationToken);
-                return Results.Created($"/departments/{departmentId}", departmentId);
-            }
-            catch (ValidationException ex)
-            {
-                return Results.BadRequest(ex.Errors);
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            var departmentId = await departmentsService.CreateDepartmentAsync(departmentDto, cancellationToken);
+            return Results.Created($"/departments/{departmentId}", departmentId);
         }
 
         private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateDepartmentDto departmentDto, [FromServices] IDepartmentService departmentsService, CancellationToken cancellationToken)
         {
-            try
-            {
-                await departmentsService.UpdateDepartmentAsync(id, departmentDto, cancellationToken);
-                return Results.Ok();
-            }
-            catch(Exception ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            await departmentsService.UpdateDepartmentAsync(id, departmentDto, cancellationToken);
+            return Results.Ok();
         }
 
         private static async Task<IResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)
@@ -68,28 +49,14 @@ namespace Web.Endpoints
 
         private async Task<IResult> AddLocationToDepartmentAsync([FromRoute] Guid departmentId, [FromRoute] Guid locationId, [FromServices] IDepartmentService departmentsService, CancellationToken cancellationToken)
         {
-            try
-            {
-                await departmentsService.AddLocationsAsync(departmentId, locationId, cancellationToken);
-                return Results.Ok();
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            await departmentsService.AddLocationsAsync(departmentId, locationId, cancellationToken);
+            return Results.Ok();
         }
 
         private async Task<IResult> RemoveLocationFromDepartmentAsync([FromRoute] Guid departmentId, [FromRoute] Guid locationId, [FromServices] IDepartmentService departmentsService, CancellationToken cancellationToken)
         {
-            try
-            {
-                await departmentsService.RemoveLocationsAsync(departmentId, locationId, cancellationToken);
-                return Results.Ok();
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            await departmentsService.RemoveLocationsAsync(departmentId, locationId, cancellationToken);
+            return Results.Ok();
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Contracts.DTOs;
+using Core.Departments.Exceptions;
 using Core.Departments.Interfaces;
+using Core.Locations.Exceptions;
 using Core.Locations.Interfaces;
 using Domain.Entities;
 using Domain.Entities.AssociativeEntities;
@@ -29,14 +31,14 @@ namespace Core.Departments.Services
         {
             var validationResult = await _createDepartmentValidator.ValidateAsync(dto, cancellationToken);
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+                throw new DepartmentValidationException(validationResult.Errors.Select(p => p.ErrorMessage));
 
             Department department;
             if (dto.ParentId.HasValue)
             {
                 var parentDepartment = await _departmentsRepository.GetByIdAsync(dto.ParentId.Value, cancellationToken);
                 if (parentDepartment == null)
-                    throw new InvalidOperationException($"Parent department with ID {dto.ParentId} does not exist.");
+                    throw new DepartmentNotFoundException(dto.ParentId.Value);
 
                 department = Department.CreateChild(parentDepartment, Name.Create(dto.Name), Slug.Create(dto.Slug));
             }
@@ -50,7 +52,7 @@ namespace Core.Departments.Services
             {
                 var locationsExists = await _locationsRepository.ExistAll(dto.locationsIds, cancellationToken);
                 if (!locationsExists)
-                    throw new InvalidOperationException($"One or more locations do not exist.");
+                    throw new LocationsNotExistsException(dto.locationsIds);
 
                 await _departmentsRepository.AddWithLocationsAsync(department, dto.locationsIds.Select(p => DepartmentLocation.Create(department.Id, p, !dto.ParentId.HasValue)), cancellationToken);
             }
@@ -66,11 +68,11 @@ namespace Core.Departments.Services
         {
             var validationResult = await _updateDepartmentValidator.ValidateAsync(dto, cancellationToken);
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+                throw new DepartmentValidationException(validationResult.Errors.Select(p => p.ErrorMessage));
 
             var existDeparment = await _departmentsRepository.GetByIdAsync(departmentId, cancellationToken);
             if (existDeparment == null)
-                throw new InvalidOperationException($"Department with ID {departmentId} does not exist.");
+                throw new DepartmentNotFoundException(departmentId);
 
             var departmentSlug = Slug.Create(dto.Slug);
 
@@ -78,14 +80,14 @@ namespace Core.Departments.Services
             if (dto.ParentId.HasValue)
             {
                 if (dto.ParentId.Value == departmentId)
-                    throw new InvalidOperationException("Department cannot be its own parent.");
+                    throw new DepartmentParentConflictException(departmentId, dto.ParentId.Value);
 
                 var parentDepartment = await _departmentsRepository.GetByIdAsync(dto.ParentId.Value, cancellationToken);
                 if (parentDepartment == null)
-                    throw new InvalidOperationException($"Parent department with ID {dto.ParentId} does not exist.");
+                    throw new DepartmentNotFoundException(dto.ParentId.Value);
 
                 if (parentDepartment.Path.IsDescendantOf(existDeparment.Path))
-                    throw new InvalidOperationException($"Department with ID {dto.ParentId} is a descendant of department with ID {departmentId} and cannot be its parent.");
+                    throw new DepartmentsDescendantException(departmentId, dto.ParentId.Value);
 
                 departmentPath = parentDepartment.Path.AppendPath(departmentSlug);
             }
@@ -103,21 +105,15 @@ namespace Core.Departments.Services
         {
             var existDeparment = await _departmentsRepository.GetByIdAsync(departmentId, cancellationToken);
             if (existDeparment == null)
-            {
-                throw new InvalidOperationException($"Department with ID {departmentId} does not exist.");
-            }
+                throw new DepartmentNotFoundException(departmentId);
 
             var existLocation = await _locationsRepository.GetByIdAsync(locationId, cancellationToken);
             if (existLocation == null)
-            {
-                throw new InvalidOperationException($"Location with ID {locationId} does not exist.");
-            }
+                throw new LocationNotFoundException(locationId);
 
             var departmentLocations = await _departmentLocationsRepository.GetAsync(departmentId, locationId, cancellationToken);
             if (departmentLocations != null)
-            {
-                throw new InvalidOperationException($"Department location with IDs {departmentId} and {locationId} already exists.");
-            }
+                throw new DepartmentLocationExistsException(departmentId, locationId);
 
             var departmentLocation = DepartmentLocation.Create(departmentId, locationId, false);
 
@@ -129,9 +125,7 @@ namespace Core.Departments.Services
         {
             var departmentLocations = await _departmentLocationsRepository.GetAsync(departmentId, locationId, cancellationToken);
             if (departmentLocations == null)
-            {
-                throw new InvalidOperationException($"Department location with IDs {departmentId} and {locationId} does not exist.");
-            }
+                throw new DepartmentLocationNotExistException(departmentId, locationId);
 
             await _departmentLocationsRepository.RemoveAsync(departmentLocations, cancellationToken);
             await _departmentLocationsRepository.SaveChangesAsync(cancellationToken);

@@ -1,4 +1,5 @@
 using Scalar.AspNetCore;
+using Web.Middlewares;
 using Web.Providers;
 
 namespace Web
@@ -23,6 +24,8 @@ namespace Web
             builder.Services.AddWebServices(connectionString);
 
             var app = builder.Build();
+
+            app.UseAppExceptionHandler();
 
             EndpointsProvider.RegisterAppEndpoints(app.MapGroup("/"));
 
