@@ -17,7 +17,7 @@ namespace Core
             services.AddScoped<IValidator<CreateLocationDto>, CreateLocationValidator>();
             services.AddScoped<IValidator<UpdateLocationDto>, UpdateLocationValidator>();
             services.AddScoped<IValidator<CreateDepartmentDto>, CreateDepartmentValidator>();
-            services.AddScoped<IValidator<UpdateDepartmentDto>, UpdateDepatmentValidator>();
+            services.AddScoped<IValidator<UpdateDepartmentDto>, UpdateDepartmentValidator>();
 
             services.AddScoped<ILocationsService, LocationsService>();
             services.AddScoped<IDepartmentService, DepartmentsService>();

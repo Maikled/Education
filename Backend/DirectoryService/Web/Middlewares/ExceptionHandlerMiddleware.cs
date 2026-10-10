@@ -26,7 +26,7 @@ namespace Web.Middlewares
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred.");
-                await HandleExceptionAsync(context, AppError.Internal("server.unexpected", ex.Message));
+                await HandleExceptionAsync(context, AppError.Internal("server.unexpected", "Server unexpected error occurred."));
             }
         }
 

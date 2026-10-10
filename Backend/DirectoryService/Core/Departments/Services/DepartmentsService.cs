@@ -70,8 +70,8 @@ namespace Core.Departments.Services
             if (!validationResult.IsValid)
                 throw new DepartmentValidationException(validationResult.Errors.Select(p => p.ErrorMessage));
 
-            var existDeparment = await _departmentsRepository.GetByIdAsync(departmentId, cancellationToken);
-            if (existDeparment == null)
+            var existDepartment = await _departmentsRepository.GetByIdAsync(departmentId, cancellationToken);
+            if (existDepartment == null)
                 throw new DepartmentNotFoundException(departmentId);
 
             var departmentSlug = Slug.Create(dto.Slug);
@@ -86,7 +86,7 @@ namespace Core.Departments.Services
                 if (parentDepartment == null)
                     throw new DepartmentNotFoundException(dto.ParentId.Value);
 
-                if (parentDepartment.Path.IsDescendantOf(existDeparment.Path))
+                if (parentDepartment.Path.IsDescendantOf(existDepartment.Path))
                     throw new DepartmentsDescendantException(departmentId, dto.ParentId.Value);
 
                 departmentPath = parentDepartment.Path.AppendPath(departmentSlug);
@@ -96,7 +96,7 @@ namespace Core.Departments.Services
                 departmentPath = DepartmentPath.Create(departmentSlug);
             }
             
-            existDeparment.Update(Name.Create(dto.Name), departmentSlug, departmentPath, dto.ParentId);
+            existDepartment.Update(Name.Create(dto.Name), departmentSlug, departmentPath, dto.ParentId);
 
             await _departmentsRepository.SaveChangesAsync(cancellationToken);
         }
