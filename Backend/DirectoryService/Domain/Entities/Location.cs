@@ -34,5 +34,22 @@ namespace Domain.Entities
 
             return new Location(name, address);
         }
+
+        public void Update(Name name, Address address)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name), "Location name cannot be null.");
+            }
+
+            if (address == null)
+            {
+                throw new ArgumentNullException(nameof(address), "Location address cannot be null.");
+            }
+
+            Name = name;
+            Address = address;
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

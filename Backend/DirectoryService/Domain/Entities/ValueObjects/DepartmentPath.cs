@@ -30,5 +30,15 @@
 
             return new DepartmentPath($"{Value}/{slug.Value}");
         }
+
+        public bool IsDescendantOf(DepartmentPath ancestor)
+        {
+            if (ancestor == null)
+            {
+                throw new ArgumentNullException(nameof(ancestor), "Ancestor path cannot be null.");
+            }
+
+            return Value.StartsWith($"{ancestor.Value}/", StringComparison.Ordinal);
+        }
     }
 }

@@ -47,6 +47,35 @@ namespace Domain.Entities
             return new Department(name, slug, path, parentId);
         }
 
+        public void Update(Name name, Slug slug, DepartmentPath path, Guid? parentId)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name), "Department name cannot be null.");
+            }
+
+            if (slug == null)
+            {
+                throw new ArgumentNullException(nameof(slug), "Department slug cannot be null.");
+            }
+
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path), "Department path cannot be null.");
+            }
+
+            if (parentId == Guid.Empty)
+            {
+                throw new ArgumentException("ParentId cannot be an empty GUID.", nameof(parentId));
+            }
+
+            Name = name;
+            Slug = slug;
+            Path = path;
+            ParentId = parentId;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
         public static Department CreateChild(Department parent, Name name, Slug slug)
         {
             if (parent == null)
