@@ -1,6 +1,7 @@
 ﻿using Contracts.DTOs;
 using Core.Departments.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Web.Extensions;
 using Web.Interfaces;
 
 namespace Web.Endpoints
@@ -32,13 +33,19 @@ namespace Web.Endpoints
 
         private static async Task<IResult> CreateAsync([FromBody] CreateDepartmentDto departmentDto, [FromServices] IDepartmentService departmentsService, CancellationToken cancellationToken)
         {
-            var departmentId = await departmentsService.CreateDepartmentAsync(departmentDto, cancellationToken);
-            return Results.Created($"/departments/{departmentId}", departmentId);
+            var departmentIdResult = await departmentsService.CreateDepartmentAsync(departmentDto, cancellationToken);
+            if (departmentIdResult.IsFailure)
+                return departmentIdResult.Error.ToResponse();
+
+            return Results.Created($"/departments/{departmentIdResult.Value}", departmentIdResult.Value);
         }
 
         private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateDepartmentDto departmentDto, [FromServices] IDepartmentService departmentsService, CancellationToken cancellationToken)
         {
-            await departmentsService.UpdateDepartmentAsync(id, departmentDto, cancellationToken);
+            var updateDepartmentResult = await departmentsService.UpdateDepartmentAsync(id, departmentDto, cancellationToken);
+            if (updateDepartmentResult.IsFailure)
+                return updateDepartmentResult.Error.ToResponse();
+
             return Results.Ok();
         }
 
@@ -49,13 +56,19 @@ namespace Web.Endpoints
 
         private async Task<IResult> AddLocationToDepartmentAsync([FromRoute] Guid departmentId, [FromRoute] Guid locationId, [FromServices] IDepartmentService departmentsService, CancellationToken cancellationToken)
         {
-            await departmentsService.AddLocationsAsync(departmentId, locationId, cancellationToken);
+            var addLocationResult = await departmentsService.AddLocationsAsync(departmentId, locationId, cancellationToken);
+            if (addLocationResult.IsFailure)
+                return addLocationResult.Error.ToResponse();
+
             return Results.Ok();
         }
 
         private async Task<IResult> RemoveLocationFromDepartmentAsync([FromRoute] Guid departmentId, [FromRoute] Guid locationId, [FromServices] IDepartmentService departmentsService, CancellationToken cancellationToken)
         {
-            await departmentsService.RemoveLocationsAsync(departmentId, locationId, cancellationToken);
+            var removeLocationResult = await departmentsService.RemoveLocationsAsync(departmentId, locationId, cancellationToken);
+            if (removeLocationResult.IsFailure)
+                return removeLocationResult.Error.ToResponse();
+
             return Results.Ok();
         }
     }

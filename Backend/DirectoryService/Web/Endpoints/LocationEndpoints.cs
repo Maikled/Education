@@ -1,6 +1,7 @@
 ﻿using Contracts.DTOs;
 using Core.Locations.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Web.Extensions;
 using Web.Interfaces;
 
 namespace Web.Endpoints
@@ -30,13 +31,19 @@ namespace Web.Endpoints
 
         private static async Task<IResult> CreateAsync([FromBody] CreateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
         {
-            var locationId = await locationsService.CreateLocationAsync(locationDto, cancellationToken);
-            return Results.Created($"/locations/{locationId}", locationId);
+            var createLocationResult = await locationsService.CreateLocationAsync(locationDto, cancellationToken);
+            if (createLocationResult.IsFailure)
+                return createLocationResult.Error.ToResponse();
+
+            return Results.Created($"/locations/{createLocationResult.Value}", createLocationResult.Value);
         }
 
         private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
         {
-            await locationsService.UpdateLocationAsync(id, locationDto, cancellationToken);
+            var updateLocationResult = await locationsService.UpdateLocationAsync(id, locationDto, cancellationToken);
+            if (updateLocationResult.IsFailure)
+                return updateLocationResult.Error.ToResponse();
+
             return Results.Ok();
         }
 

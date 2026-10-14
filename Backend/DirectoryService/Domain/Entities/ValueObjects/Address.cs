@@ -1,4 +1,7 @@
-﻿namespace Domain.Entities.ValueObjects
+﻿using Contracts.Errors;
+using CSharpFunctionalExtensions;
+
+namespace Domain.Entities.ValueObjects
 {
     public record Address
     {
@@ -19,23 +22,53 @@
             BuildingNumber = buildingNumber;
         }
 
-        public static Address Create(string country, string state, string city, string street, string buildingNumber)
+        public static Result<Address, AppError> Create(string country, string state, string city, string street, string buildingNumber)
         {
-            return new Address(ValidateParameter(country, nameof(country)), ValidateParameter(state, nameof(state)), ValidateParameter(city, nameof(city)), ValidateParameter(street, nameof(street)), ValidateParameter(buildingNumber, nameof(buildingNumber)));
+            var countryResult = ValidateParameter(country, nameof(country));
+            if (countryResult.IsFailure)
+            {
+                return countryResult.Error;
+            }
+
+            var stateResult = ValidateParameter(state, nameof(state));
+            if (stateResult.IsFailure)
+            {
+                return stateResult.Error;
+            }
+
+            var cityResult = ValidateParameter(city, nameof(city));
+            if (cityResult.IsFailure)
+            {
+                return cityResult.Error;
+            }
+
+            var streetResult = ValidateParameter(street, nameof(street));
+            if (streetResult.IsFailure)
+            {
+                return streetResult.Error;
+            }
+
+            var buildingNumberResult = ValidateParameter(buildingNumber, nameof(buildingNumber));
+            if (buildingNumberResult.IsFailure)
+            {
+                return buildingNumberResult.Error;
+            }
+
+            return new Address(countryResult.Value, stateResult.Value, cityResult.Value, streetResult.Value, buildingNumberResult.Value);
         }
 
-        private static string ValidateParameter(string parameter, string parameterName)
+        private static Result<string, AppError> ValidateParameter(string parameter, string parameterName)
         {
             if (string.IsNullOrEmpty(parameter))
             {
-                throw new ArgumentNullException(parameterName, $"{parameterName} cannot be null or empty.");
+                return AppError.Validation($"address.{parameterName}", $"{parameterName} cannot be null or empty.");
             }
 
             var normalizedParameter = parameter.Trim();
 
             if (normalizedParameter.Length > MAX_LENGTH)
             {
-                throw new ArgumentOutOfRangeException(parameterName, $"{parameterName} exceeds the maximum length of {MAX_LENGTH} characters.");
+                return AppError.Validation($"address.{parameterName}", $"{parameterName} exceeds the maximum length of {MAX_LENGTH} characters.");
             }
 
             return normalizedParameter;

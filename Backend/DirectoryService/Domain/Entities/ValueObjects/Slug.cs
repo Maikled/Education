@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using Contracts.Errors;
+using CSharpFunctionalExtensions;
+using System.Text.RegularExpressions;
 
 namespace Domain.Entities.ValueObjects
 {
@@ -18,23 +20,23 @@ namespace Domain.Entities.ValueObjects
             Value = value;
         }
 
-        public static Slug Create(string value)
+        public static Result<Slug, AppError> Create(string value)
         {
             if (string.IsNullOrEmpty(value))
             {
-                throw new ArgumentNullException(nameof(value), "Slug cannot be null or empty.");
+                return AppError.Validation("slug.value", "Slug cannot be null or empty.");
             }
 
             var normalizedValue = value.Trim().ToLowerInvariant();
 
             if (normalizedValue.Length < MIN_LENGTH || normalizedValue.Length > MAX_LENGTH)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), $"Slug must be between {MIN_LENGTH} and {MAX_LENGTH} characters long.");
+                return AppError.Validation("slug.value", $"Slug must be between {MIN_LENGTH} and {MAX_LENGTH} characters long.");
             }
 
             if (!SlugPattern.IsMatch(normalizedValue))
             {
-                throw new ArgumentException("Slug must only contain lowercase letters, numbers, and hyphens, and cannot start or end with a hyphen.", nameof(value));
+                return AppError.Validation("slug.value", "Slug must only contain lowercase letters, numbers, and hyphens, and cannot start or end with a hyphen.");
             }
 
             return new Slug(normalizedValue);

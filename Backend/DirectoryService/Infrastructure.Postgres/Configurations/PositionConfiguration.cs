@@ -14,7 +14,7 @@ namespace Infrastructure.Postgres.Configurations
             builder.HasKey(p => p.Id).HasName("pk_position");
 
             builder.Property(p => p.Name)
-                .HasConversion(p => p.Value, value => Name.Create(value))
+                .HasConversion(p => p.Value, value => Name.Create(value).Value)
                 .IsRequired()
                 .HasMaxLength(Name.MAX_LENGTH)
                 .HasColumnName("name");

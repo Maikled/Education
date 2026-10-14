@@ -1,4 +1,6 @@
-﻿using Domain.Entities.ValueObjects;
+﻿using Contracts.Errors;
+using CSharpFunctionalExtensions;
+using Domain.Entities.ValueObjects;
 
 namespace Domain.Entities
 {
@@ -16,11 +18,11 @@ namespace Domain.Entities
             CreatedAt = DateTime.UtcNow;
         }
 
-        public static Position Create(Name name)
+        public static Result<Position, AppError> Create(Name name)
         {
             if (name == null)
             {
-                throw new ArgumentNullException(nameof(name), "Position name cannot be null.");
+                return AppError.Validation("position.name", "Position name cannot be null.");
             }
 
             return new Position(name);

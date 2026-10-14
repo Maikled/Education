@@ -1,6 +1,7 @@
 ﻿using Contracts.DTOs;
-using Core.Locations.Exceptions;
+using Contracts.Errors;
 using Core.Locations.Interfaces;
+using CSharpFunctionalExtensions;
 using Domain.Entities;
 using Domain.Entities.ValueObjects;
 using FluentValidation;
@@ -20,39 +21,56 @@ namespace Core.Locations.Services
             _locationsRepository = locationsRepository;
         }
 
-        public async Task<Guid> CreateLocationAsync(CreateLocationDto dto, CancellationToken cancellationToken)
+        public async Task<Result<Guid, AppError>> CreateLocationAsync(CreateLocationDto dto, CancellationToken cancellationToken)
         {
             var validationResult = await _createLocationValidator.ValidateAsync(dto, cancellationToken);
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+                return AppError.FromErrors([.. validationResult.Errors.Select(p => AppError.Validation(p.ErrorCode, p.ErrorMessage))]);
 
-            var locationName = Name.Create(dto.Name);
-            var locationAddress = Address.Create(dto.Country, dto.State, dto.City, dto.Street, dto.BuildingNumber);
+            var locationNameResult = Name.Create(dto.Name);
+            if (locationNameResult.IsFailure)
+                return locationNameResult.Error;
 
-            var isExistLocationWithName = await _locationsRepository.ExistWithNameAsync(locationName, cancellationToken);
+            var locationAddressResult = Address.Create(dto.Country, dto.State, dto.City, dto.Street, dto.BuildingNumber);
+            if (locationAddressResult.IsFailure)
+                return locationAddressResult.Error;
+
+            var isExistLocationWithName = await _locationsRepository.ExistWithNameAsync(locationNameResult.Value, cancellationToken);
             if (isExistLocationWithName)
-                throw new LocationNameException(locationName.Value);
+                return AppError.Conflict("location.name", "A location with the same name already exists.");
 
-            var location = Location.Create(locationName, locationAddress);
+            var locationResult = Location.Create(locationNameResult.Value, locationAddressResult.Value);
+            if (locationResult.IsFailure)
+                return locationResult.Error;
 
-            await _locationsRepository.AddAsync(location, cancellationToken);
+            await _locationsRepository.AddAsync(locationResult.Value, cancellationToken);
 
-            return location.Id;
+            return locationResult.Value.Id;
         }
 
-        public async Task UpdateLocationAsync(Guid locationId, UpdateLocationDto dto, CancellationToken cancellationToken)
+        public async Task<UnitResult<AppError>> UpdateLocationAsync(Guid locationId, UpdateLocationDto dto, CancellationToken cancellationToken)
         {
             var validationResult = await _updateLocationValidator.ValidateAsync(dto, cancellationToken);
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+                return AppError.FromErrors([.. validationResult.Errors.Select(p => AppError.Validation(p.ErrorCode, p.ErrorMessage))]);
+
+            var locationNameResult = Name.Create(dto.Name);
+            if (locationNameResult.IsFailure)
+                return locationNameResult.Error;
+
+            var locationAddressResult = Address.Create(dto.Country, dto.State, dto.City, dto.Street, dto.BuildingNumber);
+            if (locationAddressResult.IsFailure)
+                return locationAddressResult.Error;
 
             var existLocation = await _locationsRepository.GetByIdAsync(locationId, cancellationToken);
             if (existLocation == null)
-                throw new LocationNotExistException(locationId);
+                return AppError.NotFound("location.not_found", $"Location with ID '{locationId}' does not exist.");
 
-            existLocation.Update(Name.Create(dto.Name), Address.Create(dto.Country, dto.State, dto.City, dto.Street, dto.BuildingNumber));
+            existLocation.Update(locationNameResult.Value, locationAddressResult.Value);
 
             await _locationsRepository.SaveChangesAsync(cancellationToken);
+
+            return UnitResult.Success<AppError>();
         }
     }
 }

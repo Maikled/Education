@@ -1,4 +1,7 @@
-﻿namespace Domain.Entities.AssociativeEntities
+﻿using Contracts.Errors;
+using CSharpFunctionalExtensions;
+
+namespace Domain.Entities.AssociativeEntities
 {
     public class DepartmentLocation
     {
@@ -15,15 +18,15 @@
             IsPrimary = isPrimary;
         }
 
-        public static DepartmentLocation Create(Guid departmentId, Guid locationId, bool isPrimary)
+        public static Result<DepartmentLocation, AppError> Create(Guid departmentId, Guid locationId, bool isPrimary)
         {
             if (departmentId == Guid.Empty)
             {
-                throw new ArgumentException("DepartmentId cannot be an empty GUID.", nameof(departmentId));
+                return AppError.Validation("department_location", "DepartmentId cannot be an empty GUID.");
             }
             if (locationId == Guid.Empty)
             {
-                throw new ArgumentException("LocationId cannot be an empty GUID.", nameof(locationId));
+                return AppError.Validation("department_location", "LocationId cannot be an empty GUID.");
             }
 
             return new DepartmentLocation(departmentId, locationId, isPrimary);
