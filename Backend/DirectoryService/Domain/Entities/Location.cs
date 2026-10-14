@@ -1,4 +1,6 @@
-﻿using Domain.Entities.ValueObjects;
+﻿using Contracts.Errors;
+using CSharpFunctionalExtensions;
+using Domain.Entities.ValueObjects;
 
 namespace Domain.Entities
 {
@@ -20,36 +22,38 @@ namespace Domain.Entities
             CreatedAt = DateTime.UtcNow;
         }
 
-        public static Location Create(Name name, Address address)
+        public static Result<Location, AppError> Create(Name name, Address address)
         {
             if (name == null)
             {
-                throw new ArgumentNullException(nameof(name), "Location name cannot be null.");
+                return AppError.Validation("location.name", "Location name cannot be null.");
             }
 
             if (address == null)
             {
-                throw new ArgumentNullException(nameof(address), "Location address cannot be null.");
+                return AppError.Validation("location.address", "Location address cannot be null.");
             }
 
             return new Location(name, address);
         }
 
-        public void Update(Name name, Address address)
+        public UnitResult<AppError> Update(Name name, Address address)
         {
             if (name == null)
             {
-                throw new ArgumentNullException(nameof(name), "Location name cannot be null.");
+                return AppError.Validation("location.name", "Location name cannot be null.");
             }
 
             if (address == null)
             {
-                throw new ArgumentNullException(nameof(address), "Location address cannot be null.");
+                return AppError.Validation("location.address", "Location address cannot be null.");
             }
 
             Name = name;
             Address = address;
             UpdatedAt = DateTime.UtcNow;
+
+            return UnitResult.Success<AppError>();
         }
     }
 }

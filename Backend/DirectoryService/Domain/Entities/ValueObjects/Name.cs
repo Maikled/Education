@@ -1,4 +1,7 @@
-﻿namespace Domain.Entities.ValueObjects
+﻿using Contracts.Errors;
+using CSharpFunctionalExtensions;
+
+namespace Domain.Entities.ValueObjects
 {
     public record Name
     {
@@ -12,18 +15,18 @@
             Value = value;
         }
 
-        public static Name Create(string value)
+        public static Result<Name, AppError> Create(string value)
         {
             if (string.IsNullOrEmpty(value))
             {
-                throw new ArgumentNullException(nameof(value), "Name cannot be null or empty.");
+                return AppError.Validation("name.value", "Name cannot be null or empty.");
             }
 
             var normalizedValue = value.Trim();
 
             if (normalizedValue.Length < MIN_LENGTH || normalizedValue.Length > MAX_LENGTH)
             {
-                throw new ArgumentException($"Name must be between {MIN_LENGTH} and {MAX_LENGTH} characters.", nameof(value));
+                return AppError.Validation("name.value", $"Name must be between {MIN_LENGTH} and {MAX_LENGTH} characters.");
             }
 
             return new Name(normalizedValue);

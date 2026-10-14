@@ -26,19 +26,19 @@ namespace Infrastructure.Postgres.Configurations
                 .HasConstraintName("fk_department_parent");
 
             builder.Property(p => p.Name)
-                .HasConversion(p => p.Value, value => Name.Create(value))
+                .HasConversion(p => p.Value, value => Name.Create(value).Value)
                 .IsRequired()
                 .HasMaxLength(Name.MAX_LENGTH)
                 .HasColumnName("name");
 
             builder.Property(p => p.Slug)
-                .HasConversion(p => p.Value, value => Slug.Create(value))
+                .HasConversion(p => p.Value, value => Slug.Create(value).Value)
                 .IsRequired()
                 .HasMaxLength(Slug.MAX_LENGTH)
                 .HasColumnName("slug");
 
             builder.Property(p => p.Path)
-                .HasConversion(p => p.Value, value => DepartmentPath.Create(Slug.Create(value)))
+                .HasConversion(p => p.Value, value => DepartmentPath.Create(Slug.Create(value).Value).Value)
                 .IsRequired()
                 .HasColumnName("path");
 

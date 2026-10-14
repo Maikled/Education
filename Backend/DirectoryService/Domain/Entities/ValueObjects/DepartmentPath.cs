@@ -1,4 +1,7 @@
-﻿namespace Domain.Entities.ValueObjects
+﻿using Contracts.Errors;
+using CSharpFunctionalExtensions;
+
+namespace Domain.Entities.ValueObjects
 {
     public record DepartmentPath
     {
@@ -9,33 +12,43 @@
             Value = value;
         }
 
-        private static void ValidateSlug(Slug slug)
+        private static UnitResult<AppError> ValidateSlug(Slug slug)
         {
             if (slug == null)
             {
-                throw new ArgumentNullException(nameof(slug), "Slug cannot be null.");
+                return AppError.Validation("departmentPath.slug", "Slug cannot be null.");
             }
+
+            return UnitResult.Success<AppError>();
         }
 
-        public static DepartmentPath Create(Slug slug)
+        public static Result<DepartmentPath, AppError> Create(Slug slug)
         {
-            ValidateSlug(slug);
+            var validateResult = ValidateSlug(slug);
+            if (validateResult.IsFailure)
+            {
+                return validateResult.Error;
+            }
 
             return new DepartmentPath(slug.Value);
         }
 
-        public DepartmentPath AppendPath(Slug slug)
+        public Result<DepartmentPath, AppError> AppendPath(Slug slug)
         {
-            ValidateSlug(slug);
+            var validateResult = ValidateSlug(slug);
+            if (validateResult.IsFailure)
+            {
+                return validateResult.Error;
+            }
 
             return new DepartmentPath($"{Value}/{slug.Value}");
         }
 
-        public bool IsDescendantOf(DepartmentPath ancestor)
+        public Result<bool, AppError> IsDescendantOf(DepartmentPath ancestor)
         {
             if (ancestor == null)
             {
-                throw new ArgumentNullException(nameof(ancestor), "Ancestor path cannot be null.");
+                return AppError.Validation("departmentPath.ancestor", "Ancestor path cannot be null.");
             }
 
             return Value.StartsWith($"{ancestor.Value}/", StringComparison.Ordinal);

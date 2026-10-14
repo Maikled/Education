@@ -1,4 +1,6 @@
-﻿using Domain.Entities.ValueObjects;
+﻿using Contracts.Errors;
+using CSharpFunctionalExtensions;
+using Domain.Entities.ValueObjects;
 
 namespace Domain.Entities
 {
@@ -22,51 +24,51 @@ namespace Domain.Entities
             CreatedAt = DateTime.UtcNow;
         }
 
-        public static Department Create(Name name, Slug slug, DepartmentPath path, Guid? parentId)
+        public static Result<Department, AppError> Create(Name name, Slug slug, DepartmentPath path, Guid? parentId)
         {
             if (name == null)
             {
-                throw new ArgumentNullException(nameof(name), "Department name cannot be null.");
+                return AppError.Validation("department.name", "Department name cannot be null.");
             }
 
             if (slug == null)
             {
-                throw new ArgumentNullException(nameof(slug), "Department slug cannot be null.");
+                return AppError.Validation("department.slug", "Department slug cannot be null.");
             }
             
             if (path == null)
             {
-                throw new ArgumentNullException(nameof(path), "Department path cannot be null.");
+                return AppError.Validation("department.path", "Department path cannot be null.");
             }
 
             if (parentId == Guid.Empty)
             {
-                throw new ArgumentException("ParentId cannot be an empty GUID.", nameof(parentId));
+                return AppError.Validation("department.parentId", "ParentId cannot be an empty GUID.");
             }
 
             return new Department(name, slug, path, parentId);
         }
 
-        public void Update(Name name, Slug slug, DepartmentPath path, Guid? parentId)
+        public UnitResult<AppError> Update(Name name, Slug slug, DepartmentPath path, Guid? parentId)
         {
             if (name == null)
             {
-                throw new ArgumentNullException(nameof(name), "Department name cannot be null.");
+                return AppError.Validation("department.name", "Department name cannot be null.");
             }
 
             if (slug == null)
             {
-                throw new ArgumentNullException(nameof(slug), "Department slug cannot be null.");
+                return AppError.Validation("department.slug", "Department slug cannot be null.");
             }
 
             if (path == null)
             {
-                throw new ArgumentNullException(nameof(path), "Department path cannot be null.");
+                return AppError.Validation("department.path", "Department path cannot be null.");
             }
 
             if (parentId == Guid.Empty)
             {
-                throw new ArgumentException("ParentId cannot be an empty GUID.", nameof(parentId));
+                return AppError.Validation("department.parentId", "ParentId cannot be an empty GUID.");
             }
 
             Name = name;
@@ -74,16 +76,22 @@ namespace Domain.Entities
             Path = path;
             ParentId = parentId;
             UpdatedAt = DateTime.UtcNow;
+
+            return UnitResult.Success<AppError>();
         }
 
-        public static Department CreateChild(Department parent, Name name, Slug slug)
+        public static Result<Department, AppError> CreateChild(Department parent, Name name, Slug slug)
         {
             if (parent == null)
             {
-                throw new ArgumentNullException(nameof(parent), "Parent department cannot be null.");
+                return AppError.Validation("department.parent", "Parent department cannot be null.");
             }
 
-            return Create(name, slug, parent.Path.AppendPath(slug), parent.Id);
+            var appendPathResult = parent.Path.AppendPath(slug);
+            if (appendPathResult.IsFailure)
+                return appendPathResult.Error;
+
+            return Create(name, slug, appendPathResult.Value, parent.Id);
         }
     }
 }
