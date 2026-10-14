@@ -13,6 +13,8 @@ namespace Infrastructure.Postgres.Locations.Repositories
         private readonly ILogger<DapperLocationsRepository> _logger;
         private const string InsertLocationSql = """INSERT INTO locations("Id", name, created_at, updated_at, "Address") VALUES (@Id, @Name, @CreatedAt, @UpdatedAt, @Address::jsonb);""";
         private const string CheckLocationExistenceSql = """SELECT EXISTS(SELECT * FROM locations WHERE name = @Name)""";
+        private const string CheckLocationExistenceByIdSql = """SELECT EXISTS(SELECT * FROM locations WHERE "Id" = @Id)""";
+        private const string CheckLocationExistenceByIdsSql = """SELECT COUNT(*) = @Count FROM locations WHERE "Id" = ANY(@Ids)""";
 
         public DapperLocationsRepository(DapperContextFactory contextFactory, ILogger<DapperLocationsRepository> logger)
         {
@@ -51,6 +53,24 @@ namespace Infrastructure.Postgres.Locations.Repositories
             using var connection = await _contextFactory.GetConnection(cancellationToken);
 
             var result = await connection.QueryAsync<bool>(CheckLocationExistenceSql, new { Name = name.Value });
+
+            return result.First();
+        }
+
+        public async Task<bool> ExistById(Guid locationId, CancellationToken cancellationToken)
+        {
+            using var connection = await _contextFactory.GetConnection(cancellationToken);
+
+            var result = await connection.QueryAsync<bool>(CheckLocationExistenceByIdSql, new { Id = locationId });
+
+            return result.First();
+        }
+
+        public async Task<bool> ExistAll(IEnumerable<Guid> locationIds, CancellationToken cancellationToken)
+        {
+            using var connection = await _contextFactory.GetConnection(cancellationToken);
+
+            var result = await connection.QueryAsync<bool>(CheckLocationExistenceByIdsSql, new { Ids = locationIds, Count = locationIds.Distinct().Count() });
 
             return result.First();
         }
