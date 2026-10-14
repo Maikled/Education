@@ -1,4 +1,5 @@
 ﻿using Contracts.DTOs;
+using Core.Locations.Exceptions;
 using Core.Locations.Interfaces;
 using Domain.Entities;
 using Domain.Entities.ValueObjects;
@@ -30,7 +31,7 @@ namespace Core.Locations.Services
 
             var isExistLocationWithName = await _locationsRepository.ExistWithNameAsync(locationName, cancellationToken);
             if (isExistLocationWithName)
-                throw new InvalidOperationException($"Location with name '{locationName.Value}' already exists.");
+                throw new LocationNameException(locationName.Value);
 
             var location = Location.Create(locationName, locationAddress);
 
@@ -47,7 +48,7 @@ namespace Core.Locations.Services
 
             var existLocation = await _locationsRepository.GetByIdAsync(locationId, cancellationToken);
             if (existLocation == null)
-                throw new InvalidOperationException($"Location with ID {locationId} does not exist.");
+                throw new LocationNotExistException(locationId);
 
             existLocation.Update(Name.Create(dto.Name), Address.Create(dto.Country, dto.State, dto.City, dto.Street, dto.BuildingNumber));
 

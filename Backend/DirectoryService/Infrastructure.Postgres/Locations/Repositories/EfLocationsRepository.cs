@@ -2,35 +2,24 @@
 using Domain.Entities;
 using Domain.Entities.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Postgres.Locations.Repositories
 {
     internal class EfLocationsRepository : ILocationsRepository
     {
         private readonly AppDbContext _dbContext;
-        private readonly ILogger<EfLocationsRepository> _logger;
 
-        public EfLocationsRepository(AppDbContext dbContext, ILogger<EfLocationsRepository> logger)
+        public EfLocationsRepository(AppDbContext dbContext)
         {
             _dbContext = dbContext;
-            _logger = logger;
         }
 
         public async Task<Guid> AddAsync(Location location, CancellationToken cancellationToken)
         {
-            try
-            {
-                await _dbContext.Locations.AddAsync(location, cancellationToken);
-                await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.Locations.AddAsync(location, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-                return location.Id;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while adding a location.");
-                throw;
-            }
+            return location.Id;
         }
 
         public async Task<bool> ExistWithNameAsync(Name name, CancellationToken cancellationToken)
