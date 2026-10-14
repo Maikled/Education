@@ -35,7 +35,7 @@ namespace Web.Endpoints
             if (createLocationResult.IsFailure)
                 return createLocationResult.Error.ToResponse();
 
-            return Results.Created($"/locations/{createLocationResult.Value}", createLocationResult);
+            return Results.Created($"/locations/{createLocationResult.Value}", createLocationResult.Value);
         }
 
         private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)

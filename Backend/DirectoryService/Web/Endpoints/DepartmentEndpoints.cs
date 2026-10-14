@@ -37,7 +37,7 @@ namespace Web.Endpoints
             if (departmentIdResult.IsFailure)
                 return departmentIdResult.Error.ToResponse();
 
-            return Results.Created($"/departments/{departmentIdResult.Value}", departmentIdResult);
+            return Results.Created($"/departments/{departmentIdResult.Value}", departmentIdResult.Value);
         }
 
         private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateDepartmentDto departmentDto, [FromServices] IDepartmentService departmentsService, CancellationToken cancellationToken)
