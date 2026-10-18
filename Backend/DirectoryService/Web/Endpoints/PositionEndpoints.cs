@@ -1,5 +1,6 @@
 ﻿using Contracts.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Web.Endpoints.Models;
 using Web.Interfaces;
 
 namespace Web.Endpoints
@@ -17,29 +18,29 @@ namespace Web.Endpoints
             group.MapDelete("/{id:guid}", DeleteAsync);
         }
 
-        private static async Task<IResult> GetAllAsync(CancellationToken cancellationToken)
+        private static async Task<EndpointResult> GetAllAsync(CancellationToken cancellationToken)
         {
-            return Results.Ok(Array.Empty<object>());
+            return EndpointResult.Empty;
         }
 
-        private static async Task<IResult> GetByIdAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+        private static async Task<EndpointResult> GetByIdAsync([FromRoute] Guid id, CancellationToken cancellationToken)
         {
-            return Results.NotFound();
+            return EndpointResult.Empty;
         }
 
-        private static async Task<IResult> CreateAsync([FromBody] CreatePositionDto positionDto, CancellationToken cancellationToken)
+        private static async Task<EndpointResult> CreateAsync([FromBody] CreatePositionDto positionDto, CancellationToken cancellationToken)
         {
-            return Results.Created();
+            return EndpointResult.Empty;
         }
 
-        private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdatePositionDto positionDto, CancellationToken cancellationToken)
+        private static async Task<EndpointResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdatePositionDto positionDto, CancellationToken cancellationToken)
         {
-            return Results.Ok();
+            return EndpointResult.Empty;
         }
 
-        private static async Task<IResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+        private static async Task<EndpointResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)
         {
-            return Results.NoContent();
+            return EndpointResult.Empty;
         }
     }
 }

@@ -33,6 +33,6 @@ namespace Contracts.Errors
         public static AppError NotFound(string code, string message) => new AppError(code, AppErrorType.NotFound, message);
         public static AppError Conflict(string code, string message) => new AppError(code, AppErrorType.Conflict, message);
         public static AppError Internal(string code, string message) => new AppError(code, AppErrorType.Internal, message);
-        public static AppError FromErrors(AppError[] errors) => JoinErrors(errors);
+        public static AppError FromErrors(IEnumerable<AppError> errors) => JoinErrors(errors.ToArray());
     }
 }

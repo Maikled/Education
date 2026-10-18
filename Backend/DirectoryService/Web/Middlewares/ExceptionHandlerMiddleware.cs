@@ -1,9 +1,9 @@
 ﻿using Contracts.Errors;
-using Contracts.Errors.Enums;
+using Web.Endpoints.Models;
 
 namespace Web.Middlewares
 {
-    public class ExceptionHandlerMiddleware : IMiddleware
+    internal class ExceptionHandlerMiddleware : IMiddleware
     {
         private readonly ILogger<ExceptionHandlerMiddleware> _logger;
 
@@ -21,31 +21,17 @@ namespace Web.Middlewares
             catch (AppException appException)
             {
                 _logger.LogError(appException, "An application error occurred.");
-                await HandleExceptionAsync(context, appException.AppError);
+                await new ErrorResult(appException.AppError).ExecuteAsync(context);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred.");
-                await HandleExceptionAsync(context, AppError.Internal("server.unexpected", "Server unexpected error occurred."));
+                await new ErrorResult(AppError.Internal("server.unexpected", "Server unexpected error occurred.")).ExecuteAsync(context);
             }
-        }
-
-        private async Task HandleExceptionAsync(HttpContext context, AppError appError)
-        {
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = appError.Type switch
-            {
-                AppErrorType.Validation => StatusCodes.Status400BadRequest,
-                AppErrorType.NotFound => StatusCodes.Status404NotFound,
-                AppErrorType.Conflict => StatusCodes.Status409Conflict,
-                _ => StatusCodes.Status500InternalServerError
-            };
-
-            await context.Response.WriteAsJsonAsync(appError);
         }
     }
 
-    public static class ExceptionHandlerMiddlewareExtensions
+    internal static class ExceptionHandlerMiddlewareExtensions
     {
         public static IApplicationBuilder UseAppExceptionHandler(this IApplicationBuilder builder)
         {

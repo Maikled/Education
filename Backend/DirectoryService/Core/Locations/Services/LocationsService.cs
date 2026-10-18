@@ -31,7 +31,7 @@ namespace Core.Locations.Services
             if (locationNameResult.IsFailure)
                 return locationNameResult.Error;
 
-            var locationAddressResult = Address.Create(dto.Country, dto.State, dto.City, dto.Street, dto.BuildingNumber);
+            var locationAddressResult = Address.Create(dto.Address.Country, dto.Address.State, dto.Address.City, dto.Address.Street, dto.Address.BuildingNumber);
             if (locationAddressResult.IsFailure)
                 return locationAddressResult.Error;
 
@@ -58,7 +58,7 @@ namespace Core.Locations.Services
             if (locationNameResult.IsFailure)
                 return locationNameResult.Error;
 
-            var locationAddressResult = Address.Create(dto.Country, dto.State, dto.City, dto.Street, dto.BuildingNumber);
+            var locationAddressResult = Address.Create(dto.Address.Country, dto.Address.State, dto.Address.City, dto.Address.Street, dto.Address.BuildingNumber);
             if (locationAddressResult.IsFailure)
                 return locationAddressResult.Error;
 
