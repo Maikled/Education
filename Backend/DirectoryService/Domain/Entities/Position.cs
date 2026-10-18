@@ -20,12 +20,21 @@ namespace Domain.Entities
 
         public static Result<Position, AppError> Create(Name name)
         {
-            if (name == null)
-            {
-                return AppError.Validation("position.name", "Position name cannot be null.");
-            }
+            var validationResult = Validate(name);
+            if (validationResult.IsFailure)
+                return validationResult.ConvertFailure<Position>();
 
             return new Position(name);
+        }
+
+        public static UnitResult<AppError> Validate(Name name)
+        {
+            return ValidateName(name);
+        }
+
+        private static UnitResult<AppError> ValidateName(Name name)
+        {
+            return UnitResult.FailureIf(name == null, AppError.Validation("position.name", "Position name cannot be null."));
         }
     }
 }

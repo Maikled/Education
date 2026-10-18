@@ -24,54 +24,43 @@ namespace Domain.Entities.ValueObjects
 
         public static Result<Address, AppError> Create(string country, string state, string city, string street, string buildingNumber)
         {
-            var countryResult = ValidateParameter(country, nameof(country));
-            if (countryResult.IsFailure)
-            {
-                return countryResult.Error;
-            }
+            var validationResult = Validate(country, state, city, street, buildingNumber);
+            if (validationResult.IsFailure)
+                return validationResult.ConvertFailure<Address>();
 
-            var stateResult = ValidateParameter(state, nameof(state));
-            if (stateResult.IsFailure)
-            {
-                return stateResult.Error;
-            }
-
-            var cityResult = ValidateParameter(city, nameof(city));
-            if (cityResult.IsFailure)
-            {
-                return cityResult.Error;
-            }
-
-            var streetResult = ValidateParameter(street, nameof(street));
-            if (streetResult.IsFailure)
-            {
-                return streetResult.Error;
-            }
-
-            var buildingNumberResult = ValidateParameter(buildingNumber, nameof(buildingNumber));
-            if (buildingNumberResult.IsFailure)
-            {
-                return buildingNumberResult.Error;
-            }
-
-            return new Address(countryResult.Value, stateResult.Value, cityResult.Value, streetResult.Value, buildingNumberResult.Value);
+            return new Address(Normalize(country), Normalize(state), Normalize(city), Normalize(street), Normalize(buildingNumber));
         }
 
-        private static Result<string, AppError> ValidateParameter(string parameter, string parameterName)
+        public static UnitResult<AppError> Validate(string country, string state, string city, string street, string buildingNumber)
         {
-            if (string.IsNullOrEmpty(parameter))
-            {
-                return AppError.Validation($"address.{parameterName}", $"{parameterName} cannot be null or empty.");
-            }
+            return Result.Combine(
+                errors => AppError.FromErrors(errors),
+                ValidateParameter(country, nameof(country)),
+                ValidateParameter(state, nameof(state)),
+                ValidateParameter(city, nameof(city)),
+                ValidateParameter(street, nameof(street)),
+                ValidateParameter(buildingNumber, nameof(buildingNumber)));
+        }
 
-            var normalizedParameter = parameter.Trim();
+        private static string Normalize(string parameter) => parameter.Trim();
 
-            if (normalizedParameter.Length > MAX_LENGTH)
-            {
-                return AppError.Validation($"address.{parameterName}", $"{parameterName} exceeds the maximum length of {MAX_LENGTH} characters.");
-            }
+        private static UnitResult<AppError> ValidateParameter(string parameter, string parameterName)
+        {
+            var notEmptyResult = ValidateNotEmpty(parameter, parameterName);
+            if (notEmptyResult.IsFailure)
+                return notEmptyResult;
 
-            return normalizedParameter;
+            return ValidateLength(Normalize(parameter), parameterName);
+        }
+
+        private static UnitResult<AppError> ValidateNotEmpty(string parameter, string parameterName)
+        {
+            return UnitResult.FailureIf(string.IsNullOrEmpty(parameter), AppError.Validation($"address.{parameterName}", $"{parameterName} cannot be null or empty."));
+        }
+
+        private static UnitResult<AppError> ValidateLength(string normalizedParameter, string parameterName)
+        {
+            return UnitResult.FailureIf(normalizedParameter.Length > MAX_LENGTH, AppError.Validation($"address.{parameterName}", $"{parameterName} exceeds the maximum length of {MAX_LENGTH} characters."));
         }
     }
 }

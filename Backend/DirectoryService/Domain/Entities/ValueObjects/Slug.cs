@@ -22,24 +22,39 @@ namespace Domain.Entities.ValueObjects
 
         public static Result<Slug, AppError> Create(string value)
         {
-            if (string.IsNullOrEmpty(value))
-            {
-                return AppError.Validation("slug.value", "Slug cannot be null or empty.");
-            }
+            var validationResult = Validate(value);
+            if (validationResult.IsFailure)
+                return validationResult.ConvertFailure<Slug>();
 
-            var normalizedValue = value.Trim().ToLowerInvariant();
+            return new Slug(Normalize(value));
+        }
 
-            if (normalizedValue.Length < MIN_LENGTH || normalizedValue.Length > MAX_LENGTH)
-            {
-                return AppError.Validation("slug.value", $"Slug must be between {MIN_LENGTH} and {MAX_LENGTH} characters long.");
-            }
+        public static UnitResult<AppError> Validate(string value)
+        {
+            var notEmptyResult = ValidateNotEmpty(value);
+            if (notEmptyResult.IsFailure)
+                return notEmptyResult;
 
-            if (!SlugPattern.IsMatch(normalizedValue))
-            {
-                return AppError.Validation("slug.value", "Slug must only contain lowercase letters, numbers, and hyphens, and cannot start or end with a hyphen.");
-            }
+            var normalizedValue = Normalize(value);
 
-            return new Slug(normalizedValue);
+            return Result.Combine(errors => AppError.FromErrors(errors), ValidateLength(normalizedValue), ValidateFormat(normalizedValue));
+        }
+
+        private static string Normalize(string value) => value.Trim().ToLowerInvariant();
+
+        private static UnitResult<AppError> ValidateNotEmpty(string value)
+        {
+            return UnitResult.FailureIf(string.IsNullOrEmpty(value), AppError.Validation("slug.value", "Slug cannot be null or empty."));
+        }
+
+        private static UnitResult<AppError> ValidateLength(string normalizedValue)
+        {
+            return UnitResult.FailureIf(normalizedValue.Length < MIN_LENGTH || normalizedValue.Length > MAX_LENGTH, AppError.Validation("slug.value", $"Slug must be between {MIN_LENGTH} and {MAX_LENGTH} characters long."));
+        }
+
+        private static UnitResult<AppError> ValidateFormat(string normalizedValue)
+        {
+            return UnitResult.FailureIf(!SlugPattern.IsMatch(normalizedValue), AppError.Validation("slug.value", "Slug must only contain lowercase letters, numbers, and hyphens, and cannot start or end with a hyphen."));
         }
     }
 }

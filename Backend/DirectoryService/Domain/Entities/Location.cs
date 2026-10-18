@@ -24,36 +24,39 @@ namespace Domain.Entities
 
         public static Result<Location, AppError> Create(Name name, Address address)
         {
-            if (name == null)
-            {
-                return AppError.Validation("location.name", "Location name cannot be null.");
-            }
-
-            if (address == null)
-            {
-                return AppError.Validation("location.address", "Location address cannot be null.");
-            }
+            var validationResult = Validate(name, address);
+            if (validationResult.IsFailure)
+                return validationResult.ConvertFailure<Location>();
 
             return new Location(name, address);
         }
 
         public UnitResult<AppError> Update(Name name, Address address)
         {
-            if (name == null)
-            {
-                return AppError.Validation("location.name", "Location name cannot be null.");
-            }
-
-            if (address == null)
-            {
-                return AppError.Validation("location.address", "Location address cannot be null.");
-            }
+            var validationResult = Validate(name, address);
+            if (validationResult.IsFailure)
+                return validationResult;
 
             Name = name;
             Address = address;
             UpdatedAt = DateTime.UtcNow;
 
             return UnitResult.Success<AppError>();
+        }
+
+        public static UnitResult<AppError> Validate(Name name, Address address)
+        {
+            return Result.Combine(errors => AppError.FromErrors(errors), ValidateName(name), ValidateAddress(address));
+        }
+
+        private static UnitResult<AppError> ValidateName(Name name)
+        {
+            return UnitResult.FailureIf(name == null, AppError.Validation("location.name", "Location name cannot be null."));
+        }
+
+        private static UnitResult<AppError> ValidateAddress(Address address)
+        {
+            return UnitResult.FailureIf(address == null, AppError.Validation("location.address", "Location address cannot be null."));
         }
     }
 }

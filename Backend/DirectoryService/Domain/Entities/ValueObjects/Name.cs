@@ -17,19 +17,32 @@ namespace Domain.Entities.ValueObjects
 
         public static Result<Name, AppError> Create(string value)
         {
-            if (string.IsNullOrEmpty(value))
-            {
-                return AppError.Validation("name.value", "Name cannot be null or empty.");
-            }
+            var validationResult = Validate(value);
+            if (validationResult.IsFailure)
+                return validationResult.ConvertFailure<Name>();
 
-            var normalizedValue = value.Trim();
+            return new Name(Normalize(value));
+        }
 
-            if (normalizedValue.Length < MIN_LENGTH || normalizedValue.Length > MAX_LENGTH)
-            {
-                return AppError.Validation("name.value", $"Name must be between {MIN_LENGTH} and {MAX_LENGTH} characters.");
-            }
+        public static UnitResult<AppError> Validate(string value)
+        {
+            var notEmptyResult = ValidateNotEmpty(value);
+            if (notEmptyResult.IsFailure)
+                return notEmptyResult;
 
-            return new Name(normalizedValue);
+            return ValidateLength(Normalize(value));
+        }
+
+        private static string Normalize(string value) => value.Trim();
+
+        private static UnitResult<AppError> ValidateNotEmpty(string value)
+        {
+            return UnitResult.FailureIf(string.IsNullOrEmpty(value), AppError.Validation("name.value", "Name cannot be null or empty."));
+        }
+
+        private static UnitResult<AppError> ValidateLength(string normalizedValue)
+        {
+            return UnitResult.FailureIf(normalizedValue.Length < MIN_LENGTH || normalizedValue.Length > MAX_LENGTH, AppError.Validation("name.value", $"Name must be between {MIN_LENGTH} and {MAX_LENGTH} characters."));
         }
     }
 }

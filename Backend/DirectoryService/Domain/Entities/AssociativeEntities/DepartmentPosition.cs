@@ -18,16 +18,26 @@ namespace Domain.Entities.AssociativeEntities
 
         public static Result<DepartmentPosition, AppError> Create(Guid departmentId, Guid positionId)
         {
-            if (departmentId == Guid.Empty)
-            {
-                return AppError.Validation("department.id", "DepartmentId cannot be an empty GUID.");
-            }
-            if (positionId == Guid.Empty)
-            {
-                return AppError.Validation("position.id", "PositionId cannot be an empty GUID.");
-            }
+            var validationResult = Validate(departmentId, positionId);
+            if (validationResult.IsFailure)
+                return validationResult.ConvertFailure<DepartmentPosition>();
 
             return new DepartmentPosition(departmentId, positionId);
+        }
+
+        public static UnitResult<AppError> Validate(Guid departmentId, Guid positionId)
+        {
+            return Result.Combine(errors => AppError.FromErrors(errors), ValidateDepartmentId(departmentId), ValidatePositionId(positionId));
+        }
+
+        private static UnitResult<AppError> ValidateDepartmentId(Guid departmentId)
+        {
+            return UnitResult.FailureIf(departmentId == Guid.Empty, AppError.Validation("department.id", "DepartmentId cannot be an empty GUID."));
+        }
+
+        private static UnitResult<AppError> ValidatePositionId(Guid positionId)
+        {
+            return UnitResult.FailureIf(positionId == Guid.Empty, AppError.Validation("position.id", "PositionId cannot be an empty GUID."));
         }
     }
 }
