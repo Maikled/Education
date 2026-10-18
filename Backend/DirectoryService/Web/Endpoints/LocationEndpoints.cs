@@ -1,7 +1,7 @@
 ﻿using Contracts.DTOs;
 using Core.Locations.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Web.Extensions;
+using Web.Endpoints.Models;
 using Web.Interfaces;
 
 namespace Web.Endpoints
@@ -19,37 +19,29 @@ namespace Web.Endpoints
             group.MapDelete("/{id:guid}", DeleteAsync);
         }
 
-        private static async Task<IResult> GetAllAsync(CancellationToken cancellationToken)
+        private static async Task<EndpointResult> GetAllAsync(CancellationToken cancellationToken)
         {
-            return Results.Ok(Array.Empty<object>());
+            return EndpointResult.Empty;
         }
 
-        private static async Task<IResult> GetByIdAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+        private static async Task<EndpointResult> GetByIdAsync([FromRoute] Guid id, CancellationToken cancellationToken)
         {
-            return Results.NotFound();
+            return EndpointResult.Empty;
         }
 
-        private static async Task<IResult> CreateAsync([FromBody] CreateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
+        private static async Task<CreatedEndpointResult<Guid>> CreateAsync([FromBody] CreateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
         {
-            var createLocationResult = await locationsService.CreateLocationAsync(locationDto, cancellationToken);
-            if (createLocationResult.IsFailure)
-                return createLocationResult.Error.ToResponse();
-
-            return Results.Created($"/locations/{createLocationResult.Value}", createLocationResult.Value);
+            return await locationsService.CreateLocationAsync(locationDto, cancellationToken);
         }
 
-        private static async Task<IResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
+        private static async Task<EndpointResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
         {
-            var updateLocationResult = await locationsService.UpdateLocationAsync(id, locationDto, cancellationToken);
-            if (updateLocationResult.IsFailure)
-                return updateLocationResult.Error.ToResponse();
-
-            return Results.Ok();
+            return await locationsService.UpdateLocationAsync(id, locationDto, cancellationToken);
         }
 
-        private static async Task<IResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+        private static async Task<EndpointResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)
         {
-            return Results.NoContent();
+            return EndpointResult.Empty;
         }
     }
 }
