@@ -63,7 +63,7 @@ namespace Web.Endpoints.Models
             ArgumentNullException.ThrowIfNull(method);
             ArgumentNullException.ThrowIfNull(builder);
 
-            EndpointMetadata.AddSuccess<object>(builder, StatusCodes.Status200OK);
+            EndpointMetadata.AddSuccess<TValue>(builder, StatusCodes.Status200OK);
             EndpointMetadata.AddErrors(builder);
         }
 

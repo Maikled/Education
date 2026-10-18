@@ -22,7 +22,7 @@ namespace Web.Endpoints.Models
             ArgumentNullException.ThrowIfNull(method);
             ArgumentNullException.ThrowIfNull(builder);
 
-            EndpointMetadata.AddSuccess<object>(builder, StatusCodes.Status201Created);
+            EndpointMetadata.AddSuccess<TValue>(builder, StatusCodes.Status201Created);
             EndpointMetadata.AddErrors(builder);
         }
     }
