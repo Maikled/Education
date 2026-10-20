@@ -1,4 +1,8 @@
+using Infrastructure.Postgres;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Serilog;
+using System.Globalization;
 using Web.Middlewares;
 using Web.Providers;
 
@@ -8,37 +12,49 @@ namespace Web
     {
         public static async Task Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
+                .CreateBootstrapLogger();
 
-            DotEnv.Load();
-
-            var connectionString = DotEnv.Expand(builder.Configuration.GetConnectionString("PostgresConnection") ?? string.Empty);
-            if (string.IsNullOrWhiteSpace(connectionString))
+            try
             {
-                throw new InvalidOperationException("Connection string 'PostgresConnection' is not set. ");
+                Log.Information("Starting web application");
+
+                var builder = WebApplication.CreateBuilder(args);
+
+                DotEnv.Load();
+
+                builder.Services.AddLoggingServices(builder.Configuration);
+                builder.Services.AddOpenApi();
+                builder.Services.AddHealthChecks();
+                builder.Services.AddWebServices(builder);
+
+                var app = builder.Build();
+
+                app.UseAppRequestLogging();
+                app.UseAppExceptionHandler();
+
+                EndpointsProvider.RegisterAppEndpoints(app.MapGroup("/"));
+
+                app.MapHealthChecks("/health");
+
+                if (!app.Environment.IsProduction())
+                {
+                    app.MapOpenApi();
+                    app.MapScalarApiReference();
+                    app.MapGet("/", () => Results.Redirect("/scalar"));
+                }
+
+                await app.RunAsync();
             }
-
-            builder.Services.AddSingleton<ILoggerFactory>((_) => LoggerFactory.Create(loggingBuilder => loggingBuilder.AddConsole()));
-            builder.Services.AddOpenApi();
-            builder.Services.AddHealthChecks();
-            builder.Services.AddWebServices(connectionString);
-
-            var app = builder.Build();
-
-            app.UseAppExceptionHandler();
-
-            EndpointsProvider.RegisterAppEndpoints(app.MapGroup("/"));
-
-            app.MapHealthChecks("/health");
-
-            if (!app.Environment.IsProduction())
+            catch (Exception ex) when (ex is not HostAbortedException)
             {
-                app.MapOpenApi();
-                app.MapScalarApiReference();
-                app.MapGet("/", () => Results.Redirect("/scalar"));
+                Log.Fatal(ex, "Application terminated unexpectedly");
             }
-
-            await app.RunAsync();
+            finally
+            {
+                await Log.CloseAndFlushAsync();
+            }
         }
     }
 }

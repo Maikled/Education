@@ -3,7 +3,7 @@ using Web.Endpoints.Models;
 
 namespace Web.Middlewares
 {
-    internal class ExceptionHandlerMiddleware : IMiddleware
+    internal partial class ExceptionHandlerMiddleware : IMiddleware
     {
         private readonly ILogger<ExceptionHandlerMiddleware> _logger;
 
@@ -20,15 +20,17 @@ namespace Web.Middlewares
             }
             catch (AppException appException)
             {
-                _logger.LogError(appException, "An application error occurred.");
                 await new ErrorResult(appException.AppError).ExecuteAsync(context);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unexpected error occurred.");
+                LogUnexpectedError(ex);
                 await new ErrorResult(AppError.Internal("server.unexpected", "Server unexpected error occurred.")).ExecuteAsync(context);
             }
         }
+
+        [LoggerMessage(Level = LogLevel.Error, Message = "An unexpected error occurred")]
+        private partial void LogUnexpectedError(Exception exception);
     }
 
     internal static class ExceptionHandlerMiddlewareExtensions

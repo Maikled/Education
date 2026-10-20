@@ -1,0 +1,2 @@
+Применение миграций к базе данных (выполнять из папки Education\Backend\DirectoryService):
+dotnet ef database update --project Infrastructure.Postgres --startup-project Web
