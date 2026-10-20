@@ -5,20 +5,23 @@ using CSharpFunctionalExtensions;
 using Domain.Entities;
 using Domain.Entities.ValueObjects;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 
 namespace Core.Locations.Services
 {
-    internal sealed class LocationsService : ILocationsService
+    internal sealed partial class LocationsService : ILocationsService
     {
         private readonly IValidator<CreateLocationDto> _createLocationValidator;
         private readonly IValidator<UpdateLocationDto> _updateLocationValidator;
         private readonly ILocationsRepository _locationsRepository;
+        private readonly ILogger<LocationsService> _logger;
 
-        public LocationsService(IValidator<CreateLocationDto> createLocationValidator, IValidator<UpdateLocationDto> updateLocationValidator, ILocationsRepository locationsRepository)
+        public LocationsService(IValidator<CreateLocationDto> createLocationValidator, IValidator<UpdateLocationDto> updateLocationValidator, ILocationsRepository locationsRepository, ILogger<LocationsService> logger)
         {
             _createLocationValidator = createLocationValidator;
             _updateLocationValidator = updateLocationValidator;
             _locationsRepository = locationsRepository;
+            _logger = logger;
         }
 
         public async Task<Result<Guid, AppError>> CreateLocationAsync(CreateLocationDto dto, CancellationToken cancellationToken)
@@ -45,6 +48,8 @@ namespace Core.Locations.Services
 
             await _locationsRepository.AddAsync(locationResult.Value, cancellationToken);
 
+            LogLocationCreated(locationResult.Value.Id);
+
             return locationResult.Value.Id;
         }
 
@@ -70,7 +75,15 @@ namespace Core.Locations.Services
 
             await _locationsRepository.SaveChangesAsync(cancellationToken);
 
+            LogLocationUpdated(locationId);
+
             return UnitResult.Success<AppError>();
         }
+
+        [LoggerMessage(Level = LogLevel.Information, Message = "Location {LocationId} created")]
+        private partial void LogLocationCreated(Guid locationId);
+
+        [LoggerMessage(Level = LogLevel.Information, Message = "Location {LocationId} updated")]
+        private partial void LogLocationUpdated(Guid locationId);
     }
 }

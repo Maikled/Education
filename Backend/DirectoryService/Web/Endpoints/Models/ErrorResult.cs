@@ -1,5 +1,6 @@
 ﻿using Contracts.Errors;
 using Contracts.Errors.Enums;
+using Serilog;
 
 namespace Web.Endpoints.Models
 {
@@ -15,6 +16,10 @@ namespace Web.Endpoints.Models
         public Task ExecuteAsync(HttpContext httpContext)
         {
             ArgumentNullException.ThrowIfNull(httpContext);
+
+            var diagnosticContext = httpContext.RequestServices.GetService<IDiagnosticContext>();
+            diagnosticContext?.Set("ErrorCode", _error.Code);
+            diagnosticContext?.Set("ErrorType", _error.Type);
 
             httpContext.Response.StatusCode = _error.Type switch
             {

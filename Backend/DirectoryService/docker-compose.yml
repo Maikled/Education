@@ -8,9 +8,23 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "${HOST_PORT}:${CONTAINER_PORT}"
+      - "${POSTGRES_HOST_PORT}:${POSTGRES_CONTAINER_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql
 
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    restart: always
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    ports:
+      - "${SEQ_HOST_PORT}:${SEQ_CONTAINER_PORT}"
+      - "${SEQ_UI_HOST_PORT}:${SEQ_UI_CONTAINER_PORT}"
+    volumes:
+      - seq_data:/data
+
 volumes:
   postgres_data:
+  seq_data:

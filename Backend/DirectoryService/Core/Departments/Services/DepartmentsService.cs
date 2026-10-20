@@ -7,24 +7,27 @@ using Domain.Entities;
 using Domain.Entities.AssociativeEntities;
 using Domain.Entities.ValueObjects;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 
 namespace Core.Departments.Services
 {
-    internal class DepartmentsService : IDepartmentService
+    internal partial class DepartmentsService : IDepartmentService
     {
         private readonly IValidator<CreateDepartmentDto> _createDepartmentValidator;
         private readonly IValidator<UpdateDepartmentDto> _updateDepartmentValidator;
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly ILocationsRepository _locationsRepository;
         private readonly IDepartmentLocationsRepository _departmentLocationsRepository;
+        private readonly ILogger<DepartmentsService> _logger;
 
-        public DepartmentsService(IValidator<CreateDepartmentDto> createDepartmentValidator, IValidator<UpdateDepartmentDto> updateDepartmentValidator, IDepartmentsRepository departmentsRepository, ILocationsRepository locationsRepository, IDepartmentLocationsRepository departmentLocationsRepository)
+        public DepartmentsService(IValidator<CreateDepartmentDto> createDepartmentValidator, IValidator<UpdateDepartmentDto> updateDepartmentValidator, IDepartmentsRepository departmentsRepository, ILocationsRepository locationsRepository, IDepartmentLocationsRepository departmentLocationsRepository, ILogger<DepartmentsService> logger)
         {
             _createDepartmentValidator = createDepartmentValidator;
             _updateDepartmentValidator = updateDepartmentValidator;
             _departmentsRepository = departmentsRepository;
             _locationsRepository = locationsRepository;
             _departmentLocationsRepository = departmentLocationsRepository;
+            _logger = logger;
         }
 
         public async Task<Result<Guid, AppError>> CreateDepartmentAsync(CreateDepartmentDto dto, CancellationToken cancellationToken)
@@ -80,6 +83,8 @@ namespace Core.Departments.Services
                 await _departmentsRepository.AddAsync(departmentResult.Value, cancellationToken);
             }
 
+            LogDepartmentCreated(departmentResult.Value.Id, dto.ParentId);
+
             return departmentResult.Value.Id;
         }
 
@@ -132,6 +137,8 @@ namespace Core.Departments.Services
 
             await _departmentsRepository.SaveChangesAsync(cancellationToken);
 
+            LogDepartmentUpdated(departmentId, dto.ParentId);
+
             return UnitResult.Success<AppError>();
         }
 
@@ -155,7 +162,9 @@ namespace Core.Departments.Services
 
             await _departmentLocationsRepository.AddAsync(departmentLocationResult.Value, cancellationToken);
             await _departmentLocationsRepository.SaveChangesAsync(cancellationToken);
-            
+
+            LogLocationAttached(locationId, departmentId);
+
             return UnitResult.Success<AppError>();
         }
 
@@ -168,7 +177,21 @@ namespace Core.Departments.Services
             await _departmentLocationsRepository.RemoveAsync(departmentLocations, cancellationToken);
             await _departmentLocationsRepository.SaveChangesAsync(cancellationToken);
 
+            LogLocationDetached(locationId, departmentId);
+
             return UnitResult.Success<AppError>();
         }
+
+        [LoggerMessage(Level = LogLevel.Information, Message = "Department {DepartmentId} created with parent {ParentId}")]
+        private partial void LogDepartmentCreated(Guid departmentId, Guid? parentId);
+
+        [LoggerMessage(Level = LogLevel.Information, Message = "Department {DepartmentId} updated with parent {ParentId}")]
+        private partial void LogDepartmentUpdated(Guid departmentId, Guid? parentId);
+
+        [LoggerMessage(Level = LogLevel.Information, Message = "Location {LocationId} attached to department {DepartmentId}")]
+        private partial void LogLocationAttached(Guid locationId, Guid departmentId);
+
+        [LoggerMessage(Level = LogLevel.Information, Message = "Location {LocationId} detached from department {DepartmentId}")]
+        private partial void LogLocationDetached(Guid locationId, Guid departmentId);
     }
 }
