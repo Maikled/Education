@@ -1,6 +1,5 @@
 ﻿using Contracts.DTOs;
 using Core.Departments.AddDepartmentLocation;
-using Core.Departments.AddDepartmentLocations;
 using Core.Departments.CreateDepartment;
 using Core.Departments.RemoveDepartmentLocation;
 using Core.Departments.UpdateDepartment;
