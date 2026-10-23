@@ -1,5 +1,7 @@
 ﻿using Contracts.DTOs;
-using Core.Locations.Interfaces;
+using Core.Interfaces;
+using Core.Locations.CreateLocation;
+using Core.Locations.UpdateLocation;
 using Microsoft.AspNetCore.Mvc;
 using Web.Endpoints.Models;
 using Web.Interfaces;
@@ -29,14 +31,14 @@ namespace Web.Endpoints
             return EndpointResult.Empty;
         }
 
-        private static async Task<CreatedEndpointResult<Guid>> CreateAsync([FromBody] CreateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
+        private static async Task<CreatedEndpointResult<Guid>> CreateAsync([FromBody] CreateLocationDto locationDto, [FromServices] ICommandHandler<Guid, CreateLocationCommand> handler, CancellationToken cancellationToken)
         {
-            return await locationsService.CreateLocationAsync(locationDto, cancellationToken);
+            return await handler.HandlerAsync(new CreateLocationCommand(locationDto), cancellationToken);
         }
 
-        private static async Task<EndpointResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateLocationDto locationDto, [FromServices] ILocationsService locationsService, CancellationToken cancellationToken)
+        private static async Task<EndpointResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateLocationDto locationDto, [FromServices] ICommandHandler<UpdateLocationCommand> handler, CancellationToken cancellationToken)
         {
-            return await locationsService.UpdateLocationAsync(id, locationDto, cancellationToken);
+            return await handler.HandlerAsync(new UpdateLocationCommand(id, locationDto), cancellationToken);
         }
 
         private static async Task<EndpointResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)

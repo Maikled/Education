@@ -3,7 +3,7 @@ using Core.Extensions;
 using Domain.Entities.ValueObjects;
 using FluentValidation;
 
-namespace Core.Locations.Validators
+namespace Core.Locations.CreateLocation
 {
     internal sealed class CreateLocationValidator : AbstractValidator<CreateLocationDto>
     {
