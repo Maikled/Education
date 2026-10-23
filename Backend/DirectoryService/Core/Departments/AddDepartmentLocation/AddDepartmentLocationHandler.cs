@@ -1,5 +1,4 @@
 ﻿using Contracts.Errors;
-using Core.Departments.AddDepartmentLocation;
 using Core.Departments.Interfaces;
 using Core.Interfaces;
 using Core.Locations.Interfaces;
@@ -7,7 +6,7 @@ using CSharpFunctionalExtensions;
 using Domain.Entities.AssociativeEntities;
 using Microsoft.Extensions.Logging;
 
-namespace Core.Departments.AddDepartmentLocations
+namespace Core.Departments.AddDepartmentLocation
 {
     internal partial class AddDepartmentLocationHandler : ICommandHandler<AddDepartmentLocationCommand>
     {

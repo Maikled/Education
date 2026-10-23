@@ -2,6 +2,7 @@
 using Core.Departments.AddDepartmentLocation;
 using Core.Departments.AddDepartmentLocations;
 using Core.Departments.CreateDepartment;
+using Core.Departments.RemoveDepartmentLocation;
 using Core.Departments.UpdateDepartment;
 using Core.Interfaces;
 using Core.Locations.CreateLocation;
@@ -23,6 +24,7 @@ namespace Core
             services.AddScoped<ICommandHandler<Guid, CreateDepartmentCommand>, CreateDepartmentHandler>();
             services.AddScoped<ICommandHandler<UpdateDepartmentCommand>, UpdateDepartmentHandler>();
             services.AddScoped<ICommandHandler<AddDepartmentLocationCommand>, AddDepartmentLocationHandler>();
+            services.AddScoped<ICommandHandler<RemoveDepartmentLocationCommand>, RemoveDepartmentLocationHandler>();
 
             services.AddScoped<ICommandHandler<Guid, CreateLocationCommand>, CreateLocationHandler>();
             services.AddScoped<ICommandHandler<UpdateLocationCommand>, UpdateLocationHandler>();
