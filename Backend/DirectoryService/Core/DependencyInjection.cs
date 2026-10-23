@@ -1,10 +1,11 @@
 ﻿using Contracts.DTOs;
-using Core.Departments.Interfaces;
-using Core.Departments.Services;
-using Core.Departments.Validators;
-using Core.Locations.Interfaces;
-using Core.Locations.Services;
-using Core.Locations.Validators;
+using Core.Departments.AddDepartmentLocation;
+using Core.Departments.CreateDepartment;
+using Core.Departments.RemoveDepartmentLocation;
+using Core.Departments.UpdateDepartment;
+using Core.Interfaces;
+using Core.Locations.CreateLocation;
+using Core.Locations.UpdateLocation;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,8 +20,13 @@ namespace Core
             services.AddScoped<IValidator<CreateDepartmentDto>, CreateDepartmentValidator>();
             services.AddScoped<IValidator<UpdateDepartmentDto>, UpdateDepartmentValidator>();
 
-            services.AddScoped<ILocationsService, LocationsService>();
-            services.AddScoped<IDepartmentService, DepartmentsService>();
+            services.AddScoped<ICommandHandler<Guid, CreateDepartmentCommand>, CreateDepartmentHandler>();
+            services.AddScoped<ICommandHandler<UpdateDepartmentCommand>, UpdateDepartmentHandler>();
+            services.AddScoped<ICommandHandler<AddDepartmentLocationCommand>, AddDepartmentLocationHandler>();
+            services.AddScoped<ICommandHandler<RemoveDepartmentLocationCommand>, RemoveDepartmentLocationHandler>();
+
+            services.AddScoped<ICommandHandler<Guid, CreateLocationCommand>, CreateLocationHandler>();
+            services.AddScoped<ICommandHandler<UpdateLocationCommand>, UpdateLocationHandler>();
 
             return services;
         }

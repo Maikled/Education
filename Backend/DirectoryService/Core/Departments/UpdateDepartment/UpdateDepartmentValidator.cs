@@ -3,7 +3,7 @@ using Core.Extensions;
 using Domain.Entities.ValueObjects;
 using FluentValidation;
 
-namespace Core.Departments.Validators
+namespace Core.Departments.UpdateDepartment
 {
     internal class UpdateDepartmentValidator : AbstractValidator<UpdateDepartmentDto>
     {
