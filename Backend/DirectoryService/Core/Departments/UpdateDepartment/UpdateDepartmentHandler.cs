@@ -13,12 +13,14 @@ namespace Core.Departments.UpdateDepartment
     {
         private readonly IValidator<UpdateDepartmentDto> _updateDepartmentValidator;
         private readonly IDepartmentsRepository _departmentsRepository;
+        private readonly ITransactionManager _transactionManager;
         private readonly ILogger<UpdateDepartmentHandler> _logger;
 
-        public UpdateDepartmentHandler(IValidator<UpdateDepartmentDto> updateDepartmentValidator, IDepartmentsRepository departmentsRepository, ILogger<UpdateDepartmentHandler> logger)
+        public UpdateDepartmentHandler(IValidator<UpdateDepartmentDto> updateDepartmentValidator, IDepartmentsRepository departmentsRepository, ITransactionManager transactionManager, ILogger<UpdateDepartmentHandler> logger)
         {
             _updateDepartmentValidator = updateDepartmentValidator;
             _departmentsRepository = departmentsRepository;
+            _transactionManager = transactionManager;
             _logger = logger;
         }
 
@@ -67,9 +69,21 @@ namespace Core.Departments.UpdateDepartment
             if (departmentPathResult.IsFailure)
                 return departmentPathResult.Error;
 
+            var beginTransactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (beginTransactionResult.IsFailure)
+                return beginTransactionResult.Error;
+
+            await using var transaction = beginTransactionResult.Value;
+
             existDepartment.Update(departmentNameResult.Value, departmentSlugResult.Value, departmentPathResult.Value, command.UpdateDepartmentDto.ParentId);
 
-            await _departmentsRepository.SaveChangesAsync(cancellationToken);
+            var saveChangesResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveChangesResult.IsFailure)
+                return saveChangesResult.Error;
+
+            var commitResult = await transaction.CommitAsync(cancellationToken);
+            if (commitResult.IsFailure)
+                return commitResult.Error;
 
             LogDepartmentUpdated(command.DepartmentId, command.UpdateDepartmentDto.ParentId);
 

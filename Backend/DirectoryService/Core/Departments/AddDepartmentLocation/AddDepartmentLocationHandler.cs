@@ -13,18 +13,26 @@ namespace Core.Departments.AddDepartmentLocation
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly ILocationsRepository _locationsRepository;
         private readonly IDepartmentLocationsRepository _departmentLocationsRepository;
+        private readonly ITransactionManager _transactionManager;
         private readonly ILogger<AddDepartmentLocationHandler> _logger;
 
-        public AddDepartmentLocationHandler(IDepartmentsRepository departmentsRepository, ILocationsRepository locationsRepository, IDepartmentLocationsRepository departmentLocationsRepository, ILogger<AddDepartmentLocationHandler> logger)
+        public AddDepartmentLocationHandler(IDepartmentsRepository departmentsRepository, ILocationsRepository locationsRepository, IDepartmentLocationsRepository departmentLocationsRepository, ITransactionManager transactionManager, ILogger<AddDepartmentLocationHandler> logger)
         {
             _departmentsRepository = departmentsRepository;
             _locationsRepository = locationsRepository;
             _departmentLocationsRepository = departmentLocationsRepository;
+            _transactionManager = transactionManager;
             _logger = logger;
         }
 
         public async Task<UnitResult<AppError>> HandlerAsync(AddDepartmentLocationCommand command, CancellationToken cancellationToken)
         {
+            var beginTransactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (beginTransactionResult.IsFailure)
+                return beginTransactionResult.Error;
+
+            await using var transaction = beginTransactionResult.Value;
+
             var existDeparment = await _departmentsRepository.GetByIdAsync(command.DepartmentId, cancellationToken);
             if (existDeparment == null)
                 return AppError.NotFound("department", "Department not found.");
@@ -42,7 +50,14 @@ namespace Core.Departments.AddDepartmentLocation
                 return departmentLocationResult.Error;
 
             await _departmentLocationsRepository.AddAsync(departmentLocationResult.Value, cancellationToken);
-            await _departmentLocationsRepository.SaveChangesAsync(cancellationToken);
+
+            var saveChangesResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveChangesResult.IsFailure)
+                return saveChangesResult.Error;
+
+            var commitResult = await transaction.CommitAsync(cancellationToken);
+            if (commitResult.IsFailure)
+                return commitResult.Error;
 
             LogLocationAttached(command.LocationId, command.DepartmentId);
 
