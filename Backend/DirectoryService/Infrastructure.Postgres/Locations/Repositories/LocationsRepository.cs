@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Postgres.Locations.Repositories
 {
-    internal class EfLocationsRepository : ILocationsRepository
+    internal class LocationsRepository : ILocationsRepository
     {
         private readonly AppDbContext _dbContext;
 
-        public EfLocationsRepository(AppDbContext dbContext)
+        public LocationsRepository(AppDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -17,7 +17,6 @@ namespace Infrastructure.Postgres.Locations.Repositories
         public async Task<Guid> AddAsync(Location location, CancellationToken cancellationToken)
         {
             await _dbContext.Locations.AddAsync(location, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return location.Id;
         }
@@ -44,11 +43,6 @@ namespace Infrastructure.Postgres.Locations.Repositories
         public async Task<Location?> GetByIdAsync(Guid locationId, CancellationToken cancellationToken)
         {
             return await _dbContext.Locations.Where(p => p.Id == locationId).FirstOrDefaultAsync(cancellationToken);
-        }
-
-        public async Task SaveChangesAsync(CancellationToken cancellationToken)
-        {
-            await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 }

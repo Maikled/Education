@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Postgres.Departments.Repositories
 {
-    internal class EfDepartmentLocationsRepository : IDepartmentLocationsRepository
+    internal class DepartmentLocationsRepository : IDepartmentLocationsRepository
     {
         private readonly AppDbContext _dbContext;
 
-        public EfDepartmentLocationsRepository(AppDbContext dbContext)
+        public DepartmentLocationsRepository(AppDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -26,11 +26,6 @@ namespace Infrastructure.Postgres.Departments.Repositories
         public async Task RemoveAsync(DepartmentLocation departmentLocation, CancellationToken cancellationToken)
         {
             _dbContext.DepartmentLocations.Remove(departmentLocation);
-        }
-
-        public async Task SaveChangesAsync(CancellationToken cancellationToken)
-        {
-            await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 }

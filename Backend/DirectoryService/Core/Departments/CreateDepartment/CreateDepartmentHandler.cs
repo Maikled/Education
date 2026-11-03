@@ -17,13 +17,15 @@ namespace Core.Departments.CreateDepartment
         private readonly IValidator<CreateDepartmentDto> _createDepartmentValidator;
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly ILocationsRepository _locationsRepository;
+        private readonly ITransactionManager _transactionManager;
         private readonly ILogger<CreateDepartmentHandler> _logger;
 
-        public CreateDepartmentHandler(IValidator<CreateDepartmentDto> createDepartmentValidator, IDepartmentsRepository departmentsRepository, ILocationsRepository locationsRepository, ILogger<CreateDepartmentHandler> logger)
+        public CreateDepartmentHandler(IValidator<CreateDepartmentDto> createDepartmentValidator, IDepartmentsRepository departmentsRepository, ILocationsRepository locationsRepository, ITransactionManager transactionManager, ILogger<CreateDepartmentHandler> logger)
         {
             _createDepartmentValidator = createDepartmentValidator;
             _departmentsRepository = departmentsRepository;
             _locationsRepository = locationsRepository;
+            _transactionManager = transactionManager;
             _logger = logger;
         }
 
@@ -40,6 +42,12 @@ namespace Core.Departments.CreateDepartment
             var departmentsSlugResult = Slug.Create(command.CreateDepartmentDto.Slug);
             if (departmentsSlugResult.IsFailure)
                 return departmentsSlugResult.Error;
+
+            var beginTransactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (beginTransactionResult.IsFailure)
+                return beginTransactionResult.Error;
+
+            using var transaction = beginTransactionResult.Value;
 
             Result<Department, AppError> departmentResult;
             if (command.CreateDepartmentDto.ParentId.HasValue)
@@ -78,6 +86,13 @@ namespace Core.Departments.CreateDepartment
             else
             {
                 await _departmentsRepository.AddAsync(departmentResult.Value, cancellationToken);
+            }
+
+            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(cancellationToken);
+            if (saveTransactionResult.IsFailure)
+            {
+                transaction.Rollback();
+                return saveTransactionResult.Error;
             }
 
             LogDepartmentCreated(departmentResult.Value.Id, command.CreateDepartmentDto.ParentId);

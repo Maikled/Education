@@ -13,12 +13,14 @@ namespace Core.Locations.UpdateLocation
     {
         private readonly IValidator<UpdateLocationDto> _updateLocationValidator;
         private readonly ILocationsRepository _locationsRepository;
+        private readonly ITransactionManager _transactionManager;
         private readonly ILogger<UpdateLocationHandler> _logger;
 
-        public UpdateLocationHandler(IValidator<UpdateLocationDto> updateLocationValidator, ILocationsRepository locationsRepository, ILogger<UpdateLocationHandler> logger)
+        public UpdateLocationHandler(IValidator<UpdateLocationDto> updateLocationValidator, ILocationsRepository locationsRepository,  ILogger<UpdateLocationHandler> logger, ITransactionManager transactionManager)
         {
             _updateLocationValidator = updateLocationValidator;
             _locationsRepository = locationsRepository;
+            _transactionManager = transactionManager;
             _logger = logger;
         }
 
@@ -36,13 +38,24 @@ namespace Core.Locations.UpdateLocation
             if (locationAddressResult.IsFailure)
                 return locationAddressResult.Error;
 
+            var beginTransactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (beginTransactionResult.IsFailure)
+                return beginTransactionResult.Error;
+
+            using var transaction = beginTransactionResult.Value;
+
             var existLocation = await _locationsRepository.GetByIdAsync(command.LocationId, cancellationToken);
             if (existLocation == null)
                 return AppError.NotFound("location.not_found", $"Location with ID '{command.LocationId}' does not exist.");
 
             existLocation.Update(locationNameResult.Value, locationAddressResult.Value);
 
-            await _locationsRepository.SaveChangesAsync(cancellationToken);
+            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(cancellationToken);
+            if (saveTransactionResult.IsFailure)
+            {
+                transaction.Rollback();
+                return saveTransactionResult.Error;
+            }
 
             LogLocationUpdated(command.LocationId);
 

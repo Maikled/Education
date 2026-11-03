@@ -13,12 +13,14 @@ namespace Core.Departments.UpdateDepartment
     {
         private readonly IValidator<UpdateDepartmentDto> _updateDepartmentValidator;
         private readonly IDepartmentsRepository _departmentsRepository;
+        private readonly ITransactionManager _transactionManager;
         private readonly ILogger<UpdateDepartmentHandler> _logger;
 
-        public UpdateDepartmentHandler(IValidator<UpdateDepartmentDto> updateDepartmentValidator, IDepartmentsRepository departmentsRepository, ILogger<UpdateDepartmentHandler> logger)
+        public UpdateDepartmentHandler(IValidator<UpdateDepartmentDto> updateDepartmentValidator, IDepartmentsRepository departmentsRepository, ITransactionManager transactionManager, ILogger<UpdateDepartmentHandler> logger)
         {
             _updateDepartmentValidator = updateDepartmentValidator;
             _departmentsRepository = departmentsRepository;
+            _transactionManager = transactionManager;
             _logger = logger;
         }
 
@@ -67,9 +69,20 @@ namespace Core.Departments.UpdateDepartment
             if (departmentPathResult.IsFailure)
                 return departmentPathResult.Error;
 
+            var beginTransactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (beginTransactionResult.IsFailure)
+                return beginTransactionResult.Error;
+
+            using var transaction = beginTransactionResult.Value;
+
             existDepartment.Update(departmentNameResult.Value, departmentSlugResult.Value, departmentPathResult.Value, command.UpdateDepartmentDto.ParentId);
 
-            await _departmentsRepository.SaveChangesAsync(cancellationToken);
+            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(cancellationToken);
+            if (saveTransactionResult.IsFailure)
+            {
+                transaction.Rollback();
+                return saveTransactionResult.Error;
+            }
 
             LogDepartmentUpdated(command.DepartmentId, command.UpdateDepartmentDto.ParentId);
 

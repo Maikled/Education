@@ -14,12 +14,14 @@ namespace Core.Locations.CreateLocation
     {
         private readonly IValidator<CreateLocationDto> _createLocationValidator;
         private readonly ILocationsRepository _locationsRepository;
+        private readonly ITransactionManager _transactionManager;
         private readonly ILogger<CreateLocationHandler> _logger;
 
-        public CreateLocationHandler(IValidator<CreateLocationDto> createLocationValidator, ILocationsRepository locationsRepository, ILogger<CreateLocationHandler> logger)
+        public CreateLocationHandler(IValidator<CreateLocationDto> createLocationValidator, ILocationsRepository locationsRepository, ITransactionManager transactionManager, ILogger<CreateLocationHandler> logger)
         {
             _createLocationValidator = createLocationValidator;
             _locationsRepository = locationsRepository;
+            _transactionManager = transactionManager;
             _logger = logger;
         }
 
@@ -37,6 +39,12 @@ namespace Core.Locations.CreateLocation
             if (locationAddressResult.IsFailure)
                 return locationAddressResult.Error;
 
+            var beginTransactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            if (beginTransactionResult.IsFailure)
+                return beginTransactionResult.Error;
+
+            using var transaction = beginTransactionResult.Value;
+
             var isExistLocationWithName = await _locationsRepository.ExistWithNameAsync(locationNameResult.Value, cancellationToken);
             if (isExistLocationWithName)
                 return AppError.Conflict("location.name", "A location with the same name already exists.");
@@ -46,6 +54,13 @@ namespace Core.Locations.CreateLocation
                 return locationResult.Error;
 
             await _locationsRepository.AddAsync(locationResult.Value, cancellationToken);
+
+            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(cancellationToken);
+            if (saveTransactionResult.IsFailure)
+            {
+                transaction.Rollback();
+                return saveTransactionResult.Error;
+            }
 
             LogLocationCreated(locationResult.Value.Id);
 
