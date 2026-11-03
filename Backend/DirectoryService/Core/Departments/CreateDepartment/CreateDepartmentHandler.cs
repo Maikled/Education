@@ -88,7 +88,7 @@ namespace Core.Departments.CreateDepartment
                 await _departmentsRepository.AddAsync(departmentResult.Value, cancellationToken);
             }
 
-            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(cancellationToken);
+            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(transaction, cancellationToken);
             if (saveTransactionResult.IsFailure)
             {
                 transaction.Rollback();

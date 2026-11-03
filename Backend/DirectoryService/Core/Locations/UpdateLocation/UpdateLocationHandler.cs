@@ -50,7 +50,7 @@ namespace Core.Locations.UpdateLocation
 
             existLocation.Update(locationNameResult.Value, locationAddressResult.Value);
 
-            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(cancellationToken);
+            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(transaction, cancellationToken);
             if (saveTransactionResult.IsFailure)
             {
                 transaction.Rollback();

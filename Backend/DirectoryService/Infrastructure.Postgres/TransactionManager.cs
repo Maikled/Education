@@ -33,11 +33,12 @@ namespace Infrastructure.Postgres
             }
         }
 
-        public async Task<UnitResult<AppError>> SaveTransactionAsync(CancellationToken cancellationToken)
+        public async Task<UnitResult<AppError>> SaveTransactionAsync(IDbTransaction transaction, CancellationToken cancellationToken)
         {
             try
             {
                 await _dbContext.SaveChangesAsync(cancellationToken);
+                transaction.Commit();
 
                 return UnitResult.Success<AppError>();
             }

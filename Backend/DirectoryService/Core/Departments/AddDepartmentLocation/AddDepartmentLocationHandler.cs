@@ -51,7 +51,7 @@ namespace Core.Departments.AddDepartmentLocation
 
             await _departmentLocationsRepository.AddAsync(departmentLocationResult.Value, cancellationToken);
 
-            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(cancellationToken);
+            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(transaction, cancellationToken);
             if (saveTransactionResult.IsFailure)
             {
                 transaction.Rollback();

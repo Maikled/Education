@@ -77,7 +77,7 @@ namespace Core.Departments.UpdateDepartment
 
             existDepartment.Update(departmentNameResult.Value, departmentSlugResult.Value, departmentPathResult.Value, command.UpdateDepartmentDto.ParentId);
 
-            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(cancellationToken);
+            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(transaction, cancellationToken);
             if (saveTransactionResult.IsFailure)
             {
                 transaction.Rollback();

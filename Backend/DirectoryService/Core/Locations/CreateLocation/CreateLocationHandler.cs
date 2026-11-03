@@ -55,7 +55,7 @@ namespace Core.Locations.CreateLocation
 
             await _locationsRepository.AddAsync(locationResult.Value, cancellationToken);
 
-            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(cancellationToken);
+            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(transaction, cancellationToken);
             if (saveTransactionResult.IsFailure)
             {
                 transaction.Rollback();

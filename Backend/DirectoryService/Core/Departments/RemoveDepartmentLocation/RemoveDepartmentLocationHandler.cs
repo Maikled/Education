@@ -33,7 +33,7 @@ namespace Core.Departments.RemoveDepartmentLocation
 
             await _departmentLocationsRepository.RemoveAsync(departmentLocations, cancellationToken);
 
-            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(cancellationToken);
+            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(transaction, cancellationToken);
             if (saveTransactionResult.IsFailure)
             {
                 transaction.Rollback();
