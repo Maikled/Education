@@ -73,16 +73,17 @@ namespace Core.Departments.UpdateDepartment
             if (beginTransactionResult.IsFailure)
                 return beginTransactionResult.Error;
 
-            using var transaction = beginTransactionResult.Value;
+            await using var transaction = beginTransactionResult.Value;
 
             existDepartment.Update(departmentNameResult.Value, departmentSlugResult.Value, departmentPathResult.Value, command.UpdateDepartmentDto.ParentId);
 
-            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(transaction, cancellationToken);
-            if (saveTransactionResult.IsFailure)
-            {
-                transaction.Rollback();
-                return saveTransactionResult.Error;
-            }
+            var saveChangesResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveChangesResult.IsFailure)
+                return saveChangesResult.Error;
+
+            var commitResult = await transaction.CommitAsync(cancellationToken);
+            if (commitResult.IsFailure)
+                return commitResult.Error;
 
             LogDepartmentUpdated(command.DepartmentId, command.UpdateDepartmentDto.ParentId);
 

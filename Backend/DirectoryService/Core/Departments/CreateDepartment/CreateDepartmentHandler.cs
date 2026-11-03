@@ -47,7 +47,7 @@ namespace Core.Departments.CreateDepartment
             if (beginTransactionResult.IsFailure)
                 return beginTransactionResult.Error;
 
-            using var transaction = beginTransactionResult.Value;
+            await using var transaction = beginTransactionResult.Value;
 
             Result<Department, AppError> departmentResult;
             if (command.CreateDepartmentDto.ParentId.HasValue)
@@ -88,12 +88,13 @@ namespace Core.Departments.CreateDepartment
                 await _departmentsRepository.AddAsync(departmentResult.Value, cancellationToken);
             }
 
-            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(transaction, cancellationToken);
-            if (saveTransactionResult.IsFailure)
-            {
-                transaction.Rollback();
-                return saveTransactionResult.Error;
-            }
+            var saveChangesResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveChangesResult.IsFailure)
+                return saveChangesResult.Error;
+
+            var commitResult = await transaction.CommitAsync(cancellationToken);
+            if (commitResult.IsFailure)
+                return commitResult.Error;
 
             LogDepartmentCreated(departmentResult.Value.Id, command.CreateDepartmentDto.ParentId);
 

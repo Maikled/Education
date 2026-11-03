@@ -43,7 +43,7 @@ namespace Core.Locations.CreateLocation
             if (beginTransactionResult.IsFailure)
                 return beginTransactionResult.Error;
 
-            using var transaction = beginTransactionResult.Value;
+            await using var transaction = beginTransactionResult.Value;
 
             var isExistLocationWithName = await _locationsRepository.ExistWithNameAsync(locationNameResult.Value, cancellationToken);
             if (isExistLocationWithName)
@@ -55,12 +55,13 @@ namespace Core.Locations.CreateLocation
 
             await _locationsRepository.AddAsync(locationResult.Value, cancellationToken);
 
-            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(transaction, cancellationToken);
-            if (saveTransactionResult.IsFailure)
-            {
-                transaction.Rollback();
-                return saveTransactionResult.Error;
-            }
+            var saveChangesResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveChangesResult.IsFailure)
+                return saveChangesResult.Error;
+
+            var commitResult = await transaction.CommitAsync(cancellationToken);
+            if (commitResult.IsFailure)
+                return commitResult.Error;
 
             LogLocationCreated(locationResult.Value.Id);
 

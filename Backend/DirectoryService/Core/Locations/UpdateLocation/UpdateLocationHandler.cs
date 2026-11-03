@@ -42,7 +42,7 @@ namespace Core.Locations.UpdateLocation
             if (beginTransactionResult.IsFailure)
                 return beginTransactionResult.Error;
 
-            using var transaction = beginTransactionResult.Value;
+            await using var transaction = beginTransactionResult.Value;
 
             var existLocation = await _locationsRepository.GetByIdAsync(command.LocationId, cancellationToken);
             if (existLocation == null)
@@ -50,12 +50,13 @@ namespace Core.Locations.UpdateLocation
 
             existLocation.Update(locationNameResult.Value, locationAddressResult.Value);
 
-            var saveTransactionResult = await _transactionManager.SaveTransactionAsync(transaction, cancellationToken);
-            if (saveTransactionResult.IsFailure)
-            {
-                transaction.Rollback();
-                return saveTransactionResult.Error;
-            }
+            var saveChangesResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if (saveChangesResult.IsFailure)
+                return saveChangesResult.Error;
+
+            var commitResult = await transaction.CommitAsync(cancellationToken);
+            if (commitResult.IsFailure)
+                return commitResult.Error;
 
             LogLocationUpdated(command.LocationId);
 

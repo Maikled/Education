@@ -1,9 +1,7 @@
 ﻿using Contracts.Errors;
 using Core.Interfaces;
 using CSharpFunctionalExtensions;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
-using System.Data;
 
 namespace Infrastructure.Postgres
 {
@@ -18,13 +16,13 @@ namespace Infrastructure.Postgres
             _logger = logger;
         }
 
-        public async Task<Result<IDbTransaction, AppError>> BeginTransactionAsync(CancellationToken cancellationToken)
+        public async Task<Result<ITransactionScope, AppError>> BeginTransactionAsync(CancellationToken cancellationToken)
         {
             try
             {
                 var databaseTransaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
-                return databaseTransaction.GetDbTransaction();
+                return new TransactionScope(databaseTransaction, _logger);
             }
             catch(Exception ex)
             {
@@ -33,26 +31,25 @@ namespace Infrastructure.Postgres
             }
         }
 
-        public async Task<UnitResult<AppError>> SaveTransactionAsync(IDbTransaction transaction, CancellationToken cancellationToken)
+        public async Task<UnitResult<AppError>> SaveChangesAsync(CancellationToken cancellationToken)
         {
             try
             {
                 await _dbContext.SaveChangesAsync(cancellationToken);
-                transaction.Commit();
 
                 return UnitResult.Success<AppError>();
             }
             catch(Exception ex)
             {
-                LogSaveTransactionFailed(ex.Message);
-                return AppError.Internal("database.save.transaction", "Failed save database transaction");
+                LogSaveChangesFailed(ex.Message);
+                return AppError.Internal("database.save.changes", "Failed save database changes");
             }
         }
 
         [LoggerMessage(Level = LogLevel.Error, Message = "Database transaction begin failed: {errorMessage}")]
         private partial void LogBeginTransactionFailed(string errorMessage);
 
-        [LoggerMessage(Level = LogLevel.Error, Message = "Database transaction save failed: {errorMessage}")]
-        private partial void LogSaveTransactionFailed(string errorMessage);
+        [LoggerMessage(Level = LogLevel.Error, Message = "Database save changes failed: {errorMessage}")]
+        private partial void LogSaveChangesFailed(string errorMessage);
     }
 }
