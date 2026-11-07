@@ -7,22 +7,19 @@ using CSharpFunctionalExtensions;
 using Domain.Entities;
 using Domain.Entities.AssociativeEntities;
 using Domain.Entities.ValueObjects;
-using FluentValidation;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Departments.CreateDepartment
 {
     internal partial class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCommand>
     {
-        private readonly IValidator<CreateDepartmentDto> _createDepartmentValidator;
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly ILocationsRepository _locationsRepository;
         private readonly ITransactionManager _transactionManager;
         private readonly ILogger<CreateDepartmentHandler> _logger;
 
-        public CreateDepartmentHandler(IValidator<CreateDepartmentDto> createDepartmentValidator, IDepartmentsRepository departmentsRepository, ILocationsRepository locationsRepository, ITransactionManager transactionManager, ILogger<CreateDepartmentHandler> logger)
+        public CreateDepartmentHandler(IDepartmentsRepository departmentsRepository, ILocationsRepository locationsRepository, ITransactionManager transactionManager, ILogger<CreateDepartmentHandler> logger)
         {
-            _createDepartmentValidator = createDepartmentValidator;
             _departmentsRepository = departmentsRepository;
             _locationsRepository = locationsRepository;
             _transactionManager = transactionManager;
@@ -31,10 +28,6 @@ namespace Core.Departments.CreateDepartment
 
         public async Task<Result<Guid, AppError>> HandlerAsync(CreateDepartmentCommand command, CancellationToken cancellationToken)
         {
-            var validationResult = await _createDepartmentValidator.ValidateAsync(command.CreateDepartmentDto, cancellationToken);
-            if (!validationResult.IsValid)
-                return AppError.FromErrors([.. validationResult.Errors.Select(p => AppError.Validation(p.ErrorCode, p.ErrorMessage))]);
-
             var departmentNameResult = Name.Create(command.CreateDepartmentDto.Name);
             if (departmentNameResult.IsFailure)
                 return departmentNameResult.Error;

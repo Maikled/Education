@@ -1,4 +1,5 @@
 ﻿using Contracts.DTOs;
+using Core.Decorators;
 using Core.Departments.AddDepartmentLocation;
 using Core.Departments.CreateDepartment;
 using Core.Departments.RemoveDepartmentLocation;
@@ -17,8 +18,8 @@ namespace Core
         {
             services.AddScoped<IValidator<CreateLocationDto>, CreateLocationValidator>();
             services.AddScoped<IValidator<UpdateLocationDto>, UpdateLocationValidator>();
-            services.AddScoped<IValidator<CreateDepartmentDto>, CreateDepartmentValidator>();
-            services.AddScoped<IValidator<UpdateDepartmentDto>, UpdateDepartmentValidator>();
+            services.AddScoped<IValidator<CreateDepartmentCommand>, CreateDepartmentValidator>();
+            services.AddScoped<IValidator<UpdateDepartmentCommand>, UpdateDepartmentValidator>();
 
             services.AddScoped<ICommandHandler<Guid, CreateDepartmentCommand>, CreateDepartmentHandler>();
             services.AddScoped<ICommandHandler<UpdateDepartmentCommand>, UpdateDepartmentHandler>();
@@ -27,6 +28,9 @@ namespace Core
 
             services.AddScoped<ICommandHandler<Guid, CreateLocationCommand>, CreateLocationHandler>();
             services.AddScoped<ICommandHandler<UpdateLocationCommand>, UpdateLocationHandler>();
+
+            services.Decorate(typeof(ICommandHandler<,>), typeof(ValidationResultCommandHandlerDecorator<,>));
+            services.Decorate(typeof(ICommandHandler<>), typeof(ValidationUnitResultCommandHandlerDecorator<>));
 
             return services;
         }

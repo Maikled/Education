@@ -4,21 +4,18 @@ using Core.Departments.Interfaces;
 using Core.Interfaces;
 using CSharpFunctionalExtensions;
 using Domain.Entities.ValueObjects;
-using FluentValidation;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Departments.UpdateDepartment
 {
     internal partial class UpdateDepartmentHandler : ICommandHandler<UpdateDepartmentCommand>
     {
-        private readonly IValidator<UpdateDepartmentDto> _updateDepartmentValidator;
         private readonly IDepartmentsRepository _departmentsRepository;
         private readonly ITransactionManager _transactionManager;
         private readonly ILogger<UpdateDepartmentHandler> _logger;
 
-        public UpdateDepartmentHandler(IValidator<UpdateDepartmentDto> updateDepartmentValidator, IDepartmentsRepository departmentsRepository, ITransactionManager transactionManager, ILogger<UpdateDepartmentHandler> logger)
+        public UpdateDepartmentHandler(IDepartmentsRepository departmentsRepository, ITransactionManager transactionManager, ILogger<UpdateDepartmentHandler> logger)
         {
-            _updateDepartmentValidator = updateDepartmentValidator;
             _departmentsRepository = departmentsRepository;
             _transactionManager = transactionManager;
             _logger = logger;
@@ -26,10 +23,6 @@ namespace Core.Departments.UpdateDepartment
 
         public async Task<UnitResult<AppError>> HandlerAsync(UpdateDepartmentCommand command, CancellationToken cancellationToken)
         {
-            var validationResult = await _updateDepartmentValidator.ValidateAsync(command.UpdateDepartmentDto, cancellationToken);
-            if (!validationResult.IsValid)
-                return AppError.FromErrors([.. validationResult.Errors.Select(p => AppError.Validation(p.ErrorCode, p.ErrorMessage))]);
-
             var existDepartment = await _departmentsRepository.GetByIdAsync(command.DepartmentId, cancellationToken);
             if (existDepartment == null)
                 return AppError.NotFound("department", "Department not found.");

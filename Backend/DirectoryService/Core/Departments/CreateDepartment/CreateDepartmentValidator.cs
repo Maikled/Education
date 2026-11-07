@@ -1,16 +1,15 @@
-﻿using Contracts.DTOs;
-using Core.Extensions;
+﻿using Core.Extensions;
 using Domain.Entities.ValueObjects;
 using FluentValidation;
 
 namespace Core.Departments.CreateDepartment
 {
-    internal class CreateDepartmentValidator : AbstractValidator<CreateDepartmentDto>
+    internal class CreateDepartmentValidator : AbstractValidator<CreateDepartmentCommand>
     {
         public CreateDepartmentValidator()
         {
-            RuleFor(p => p.Name).MustBeSuccessResult(Name.Validate);
-            RuleFor(p => p.Slug).MustBeSuccessResult(Slug.Validate);
+            RuleFor(p => p.CreateDepartmentDto.Name).MustBeSuccessResult(Name.Validate);
+            RuleFor(p => p.CreateDepartmentDto.Slug).MustBeSuccessResult(Slug.Validate);
         }
     }
 }
