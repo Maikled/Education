@@ -44,5 +44,10 @@ namespace Infrastructure.Postgres.Locations.Repositories
         {
             return await _dbContext.Locations.Where(p => p.Id == locationId).FirstOrDefaultAsync(cancellationToken);
         }
+
+        public async Task RemoveAsync(Location location, CancellationToken cancellationToken)
+        {
+            _dbContext.Locations.Remove(location);
+        }
     }
 }

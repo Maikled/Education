@@ -1,8 +1,10 @@
 ﻿using Core.Departments.Interfaces;
 using Core.Interfaces;
 using Core.Locations.Interfaces;
+using Core.Positions.Interfaces;
 using Infrastructure.Postgres.Departments.Repositories;
 using Infrastructure.Postgres.Locations.Repositories;
+using Infrastructure.Postgres.Positions.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,6 +20,8 @@ namespace Infrastructure.Postgres
             services.AddScoped<ILocationsRepository, LocationsRepository>();
             services.AddScoped<IDepartmentsRepository, DepartmentsRepository>();
             services.AddScoped<IDepartmentLocationsRepository, DepartmentLocationsRepository>();
+            services.AddScoped<IDepartmentPositionsRepository, DepartmentPositionsRepository>();
+            services.AddScoped<IPositionsRepository, PositionsRepository>();
 
             return services;
         }

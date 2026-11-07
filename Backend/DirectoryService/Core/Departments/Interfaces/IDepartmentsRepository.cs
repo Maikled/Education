@@ -8,5 +8,7 @@ namespace Core.Departments.Interfaces
         public Task<Guid> AddAsync(Department department, CancellationToken cancellationToken);
         public Task<Guid> AddWithLocationsAsync(Department department, IEnumerable<DepartmentLocation> departmentLocations, CancellationToken cancellationToken);
         public Task<Department?> GetByIdAsync(Guid departmentId, CancellationToken cancellationToken);
+        public Task<bool> ExistChildrenAsync(Guid departmentId, CancellationToken cancellationToken);
+        public Task RemoveAsync(Department department, CancellationToken cancellationToken);
     }
 }

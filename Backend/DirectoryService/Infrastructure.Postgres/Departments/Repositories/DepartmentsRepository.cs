@@ -37,5 +37,15 @@ namespace Infrastructure.Postgres.Departments.Repositories
         {
             return await _dbContext.Departments.Where(p => p.Id == departmentId).FirstOrDefaultAsync(cancellationToken);
         }
+
+        public async Task<bool> ExistChildrenAsync(Guid departmentId, CancellationToken cancellationToken)
+        {
+            return await _dbContext.Departments.Where(p => p.ParentId == departmentId).AnyAsync(cancellationToken);
+        }
+
+        public async Task RemoveAsync(Department department, CancellationToken cancellationToken)
+        {
+            _dbContext.Departments.Remove(department);
+        }
     }
 }
