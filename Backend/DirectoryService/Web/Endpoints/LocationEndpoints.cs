@@ -2,6 +2,7 @@
 using Core.Interfaces;
 using Core.Locations.CreateLocation;
 using Core.Locations.DeleteLocation;
+using Core.Locations.GetLocation;
 using Core.Locations.UpdateLocation;
 using Microsoft.AspNetCore.Mvc;
 using Web.Endpoints.Models;
@@ -27,9 +28,9 @@ namespace Web.Endpoints
             return EndpointResult.Empty;
         }
 
-        private static async Task<EndpointResult> GetByIdAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+        private static async Task<EndpointResult<LocationDto>> GetByIdAsync([FromRoute] Guid id, [FromServices] ICommandHandler<LocationDto, GetLocationCommand> handler, CancellationToken cancellationToken)
         {
-            return EndpointResult.Empty;
+            return await handler.HandlerAsync(new GetLocationCommand(id), cancellationToken);
         }
 
         private static async Task<CreatedEndpointResult<Guid>> CreateAsync([FromBody] CreateLocationDto locationDto, [FromServices] ICommandHandler<Guid, CreateLocationCommand> handler, CancellationToken cancellationToken)
