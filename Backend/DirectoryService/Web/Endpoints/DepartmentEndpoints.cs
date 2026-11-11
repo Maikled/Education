@@ -1,7 +1,11 @@
 ﻿using Contracts.DTOs;
 using Core.Departments.AddDepartmentLocation;
+using Core.Departments.AddDepartmentPosition;
 using Core.Departments.CreateDepartment;
+using Core.Departments.DeleteDepartment;
+using Core.Departments.GetDepartment;
 using Core.Departments.RemoveDepartmentLocation;
+using Core.Departments.RemoveDepartmentPosition;
 using Core.Departments.UpdateDepartment;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +27,8 @@ namespace Web.Endpoints
             group.MapDelete("/{id:guid}", DeleteAsync);
             group.MapPost("/{departmentId:guid}/locations/{locationId:guid}", AddLocationToDepartmentAsync);
             group.MapDelete("/{departmentId:guid}/locations/{locationId:guid}", RemoveLocationFromDepartmentAsync);
+            group.MapPost("/{departmentId:guid}/positions/{positionId:guid}", AddPositionToDepartmentAsync);
+            group.MapDelete("/{departmentId:guid}/positions/{positionId:guid}", RemovePositionFromDepartmentAsync);
         }
 
         private static async Task<EndpointResult> GetAllAsync(CancellationToken cancellationToken)
@@ -30,9 +36,9 @@ namespace Web.Endpoints
             return EndpointResult.Empty;
         }
 
-        private static async Task<EndpointResult> GetByIdAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+        private static async Task<EndpointResult<DepartmentDto>> GetByIdAsync([FromRoute] Guid id, [FromServices] ICommandHandler<DepartmentDto, GetDepartmentCommand> handler, CancellationToken cancellationToken)
         {
-            return EndpointResult.Empty;
+            return await handler.HandlerAsync(new GetDepartmentCommand(id), cancellationToken);
         }
 
         private static async Task<CreatedEndpointResult<Guid>> CreateAsync([FromBody] CreateDepartmentDto departmentDto, [FromServices] ICommandHandler<Guid, CreateDepartmentCommand> handler, CancellationToken cancellationToken)
@@ -45,9 +51,9 @@ namespace Web.Endpoints
             return await handler.HandlerAsync(new UpdateDepartmentCommand(departmentDto, id), cancellationToken);
         }
 
-        private static async Task<EndpointResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+        private static async Task<EndpointResult> DeleteAsync([FromRoute] Guid id, [FromServices] ICommandHandler<DeleteDepartmentCommand> handler, CancellationToken cancellationToken)
         {
-            return EndpointResult.Empty;
+            return await handler.HandlerAsync(new DeleteDepartmentCommand(id), cancellationToken);
         }
 
         private async Task<EndpointResult> AddLocationToDepartmentAsync([FromRoute] Guid departmentId, [FromRoute] Guid locationId, [FromServices] ICommandHandler<AddDepartmentLocationCommand> handler, CancellationToken cancellationToken)
@@ -58,6 +64,16 @@ namespace Web.Endpoints
         private async Task<EndpointResult> RemoveLocationFromDepartmentAsync([FromRoute] Guid departmentId, [FromRoute] Guid locationId, [FromServices] ICommandHandler<RemoveDepartmentLocationCommand> handler, CancellationToken cancellationToken)
         {
             return await handler.HandlerAsync(new RemoveDepartmentLocationCommand(departmentId, locationId), cancellationToken);
+        }
+
+        private async Task<EndpointResult> AddPositionToDepartmentAsync([FromRoute] Guid departmentId, [FromRoute] Guid positionId, [FromServices] ICommandHandler<AddDepartmentPositionCommand> handler, CancellationToken cancellationToken)
+        {
+            return await handler.HandlerAsync(new AddDepartmentPositionCommand(departmentId, positionId), cancellationToken);
+        }
+
+        private async Task<EndpointResult> RemovePositionFromDepartmentAsync([FromRoute] Guid departmentId, [FromRoute] Guid positionId, [FromServices] ICommandHandler<RemoveDepartmentPositionCommand> handler, CancellationToken cancellationToken)
+        {
+            return await handler.HandlerAsync(new RemoveDepartmentPositionCommand(departmentId, positionId), cancellationToken);
         }
     }
 }

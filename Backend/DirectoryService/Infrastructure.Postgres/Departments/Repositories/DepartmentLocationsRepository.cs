@@ -23,9 +23,21 @@ namespace Infrastructure.Postgres.Departments.Repositories
             return await _dbContext.DepartmentLocations.Where(p => p.DepartmentId == departmentId && p.LocationId == locationId).FirstOrDefaultAsync(cancellationToken);
         }
 
+        public async Task<bool> ExistByLocationIdAsync(Guid locationId, CancellationToken cancellationToken)
+        {
+            return await _dbContext.DepartmentLocations.Where(p => p.LocationId == locationId).AnyAsync(cancellationToken);
+        }
+
         public async Task RemoveAsync(DepartmentLocation departmentLocation, CancellationToken cancellationToken)
         {
             _dbContext.DepartmentLocations.Remove(departmentLocation);
+        }
+
+        public async Task RemoveByDepartmentIdAsync(Guid departmentId, CancellationToken cancellationToken)
+        {
+            var departmentLocations = await _dbContext.DepartmentLocations.Where(p => p.DepartmentId == departmentId).ToListAsync(cancellationToken);
+
+            _dbContext.DepartmentLocations.RemoveRange(departmentLocations);
         }
     }
 }
