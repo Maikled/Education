@@ -23,9 +23,7 @@ namespace Core.Locations.GetLocation
                 return AppError.NotFound("location", "Location not found");
             }
 
-            var address = new AddressDto(location.Address.Country, location.Address.State, location.Address.City, location.Address.Street, location.Address.BuildingNumber);
-
-            return Result.Success<LocationDto, AppError>(new LocationDto(location.Id, location.Name.Value, address, location.CreatedAt, location.UpdatedAt));
+            return location;
         }
     }
 }

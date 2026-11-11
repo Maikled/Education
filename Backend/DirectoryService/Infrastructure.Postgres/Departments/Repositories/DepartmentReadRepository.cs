@@ -1,4 +1,5 @@
-﻿using Core.Departments.Interfaces;
+using Contracts.DTOs;
+using Core.Departments.Interfaces;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,9 +14,12 @@ namespace Infrastructure.Postgres.Departments.Repositories
             _queryDepartments = dbContext.Departments.AsQueryable().AsNoTracking();
         }
 
-        public async Task<Department?> GetByIdAsync(Guid departmentId, CancellationToken cancellationToken)
+        public async Task<DepartmentDto?> GetByIdAsync(Guid departmentId, CancellationToken cancellationToken)
         {
-            return await _queryDepartments.Where(p => p.Id == departmentId).FirstOrDefaultAsync(cancellationToken);
+            return await _queryDepartments
+                .Where(p => p.Id == departmentId)
+                .Select(p => new DepartmentDto(p.Id, p.Name.Value, p.Slug.Value, p.Path.Value, p.ParentId, p.CreatedAt, p.UpdatedAt))
+                .FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

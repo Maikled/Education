@@ -1,4 +1,4 @@
-﻿using Contracts.DTOs;
+using Contracts.DTOs;
 using Contracts.Errors;
 using Core.Departments.Interfaces;
 using Core.Interfaces;
@@ -23,7 +23,7 @@ namespace Core.Departments.GetDepartment
                 return AppError.NotFound("department", "Department not found");
             }
 
-            return Result.Success<DepartmentDto, AppError>(new DepartmentDto(department.Id, department.Name.Value, department.Slug.Value, department.Path.Value, department.ParentId, department.CreatedAt, department.UpdatedAt));
+            return department;
         }
     }
 }

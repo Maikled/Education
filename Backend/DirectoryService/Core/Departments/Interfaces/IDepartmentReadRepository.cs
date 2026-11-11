@@ -1,9 +1,9 @@
-﻿using Domain.Entities;
+using Contracts.DTOs;
 
 namespace Core.Departments.Interfaces
 {
     public interface IDepartmentReadRepository
     {
-        public Task<Department?> GetByIdAsync(Guid departmentId, CancellationToken cancellationToken);
+        public Task<DepartmentDto?> GetByIdAsync(Guid departmentId, CancellationToken cancellationToken);
     }
 }
