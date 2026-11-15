@@ -35,9 +35,9 @@ namespace Web.Endpoints
             return await handler.HandlerAsync(new GetLocationCommand(id), cancellationToken);
         }
 
-        private static async Task<EndpointResult<IEnumerable<TopLocationDTO>>> GetTopAsync([FromServices] ICommandHandler<IEnumerable<TopLocationDTO>, GetTopLocationCommand> handler, CancellationToken cancellationToken, int limit = 5)
+        private static async Task<EndpointResult<IEnumerable<TopLocationDTO>>> GetTopAsync([FromServices] ICommandHandler<IEnumerable<TopLocationDTO>, GetTopLocationCommand> handler, CancellationToken cancellationToken)
         {
-            return await handler.HandlerAsync(new GetTopLocationCommand(limit), cancellationToken);
+            return await handler.HandlerAsync(new GetTopLocationCommand(5), cancellationToken);
         }
 
         private static async Task<CreatedEndpointResult<Guid>> CreateAsync([FromBody] CreateLocationDto locationDto, [FromServices] ICommandHandler<Guid, CreateLocationCommand> handler, CancellationToken cancellationToken)
