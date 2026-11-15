@@ -3,6 +3,7 @@ using Core.Interfaces;
 using Core.Locations.CreateLocation;
 using Core.Locations.DeleteLocation;
 using Core.Locations.GetLocation;
+using Core.Locations.TopLocations;
 using Core.Locations.UpdateLocation;
 using Microsoft.AspNetCore.Mvc;
 using Web.Endpoints.Models;
@@ -19,6 +20,7 @@ namespace Web.Endpoints
             group.MapPost("/", CreateAsync);
             group.MapGet("/", GetAllAsync);
             group.MapGet("/{id:guid}", GetByIdAsync);
+            group.MapGet("/top", GetTopAsync);
             group.MapPatch("/{id:guid}", UpdateAsync);
             group.MapDelete("/{id:guid}", DeleteAsync);
         }
@@ -31,6 +33,11 @@ namespace Web.Endpoints
         private static async Task<EndpointResult<LocationDto>> GetByIdAsync([FromRoute] Guid id, [FromServices] ICommandHandler<LocationDto, GetLocationCommand> handler, CancellationToken cancellationToken)
         {
             return await handler.HandlerAsync(new GetLocationCommand(id), cancellationToken);
+        }
+
+        private static async Task<EndpointResult<IEnumerable<TopLocationDTO>>> GetTopAsync([FromServices] ICommandHandler<IEnumerable<TopLocationDTO>, GetTopLocationCommand> handler, CancellationToken cancellationToken, int limit = 5)
+        {
+            return await handler.HandlerAsync(new GetTopLocationCommand(limit), cancellationToken);
         }
 
         private static async Task<CreatedEndpointResult<Guid>> CreateAsync([FromBody] CreateLocationDto locationDto, [FromServices] ICommandHandler<Guid, CreateLocationCommand> handler, CancellationToken cancellationToken)
