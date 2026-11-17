@@ -43,7 +43,7 @@ namespace Infrastructure.Postgres.Locations.Repositories
                 FROM locations l
                 LEFT JOIN department_locations dl ON l."Id" = dl.location_id
                 GROUP BY l."Id", l.name, l."Address"
-                ORDER BY COUNT(dl."Id"), l."Id" DESC
+                ORDER BY COUNT(dl."Id") DESC, l."Id"
                 LIMIT @Limit
                 """;
 
