@@ -12,6 +12,7 @@ using Core.Interfaces;
 using Core.Locations.CreateLocation;
 using Core.Locations.DeleteLocation;
 using Core.Locations.GetLocation;
+using Core.Locations.TopLocations;
 using Core.Locations.UpdateLocation;
 using Core.Positions.CreatePosition;
 using Core.Positions.DeletePosition;
@@ -45,6 +46,7 @@ namespace Core
             services.AddScoped<ICommandHandler<UpdateLocationCommand>, UpdateLocationHandler>();
             services.AddScoped<ICommandHandler<DeleteLocationCommand>, DeleteLocationHandler>();
             services.AddScoped<ICommandHandler<LocationDto, GetLocationCommand>, GetLocationHandler>();
+            services.AddScoped<ICommandHandler<IEnumerable<TopLocationDTO>, GetTopLocationCommand>, GetTopLocationHandler>();
 
             services.AddScoped<ICommandHandler<Guid, CreatePositionCommand>, CreatePositionHandler>();
             services.AddScoped<ICommandHandler<UpdatePositionCommand>, UpdatePositionHandler>();
