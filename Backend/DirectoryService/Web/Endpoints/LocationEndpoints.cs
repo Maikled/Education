@@ -1,6 +1,7 @@
 ﻿using Contracts.DTOs;
 using Core.Interfaces;
 using Core.Locations.CreateLocation;
+using Core.Locations.DeleteLocation;
 using Core.Locations.UpdateLocation;
 using Microsoft.AspNetCore.Mvc;
 using Web.Endpoints.Models;
@@ -41,9 +42,9 @@ namespace Web.Endpoints
             return await handler.HandlerAsync(new UpdateLocationCommand(id, locationDto), cancellationToken);
         }
 
-        private static async Task<EndpointResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+        private static async Task<EndpointResult> DeleteAsync([FromRoute] Guid id, [FromServices] ICommandHandler<DeleteLocationCommand> handler, CancellationToken cancellationToken)
         {
-            return EndpointResult.Empty;
+            return await handler.HandlerAsync(new DeleteLocationCommand(id), cancellationToken);
         }
     }
 }

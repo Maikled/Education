@@ -27,6 +27,18 @@ namespace Domain.Entities
             return new Position(name);
         }
 
+        public UnitResult<AppError> Update(Name name)
+        {
+            var validationResult = Validate(name);
+            if (validationResult.IsFailure)
+                return validationResult;
+
+            Name = name;
+            UpdatedAt = DateTime.UtcNow;
+
+            return UnitResult.Success<AppError>();
+        }
+
         public static UnitResult<AppError> Validate(Name name)
         {
             return ValidateName(name);
