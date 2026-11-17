@@ -43,6 +43,10 @@ namespace Infrastructure.Postgres.Departments.Repositories
                     _ => query
                 };
             }
+            else
+            {
+                query = OrderBySortDirection(query, p => p.Name.Value, sortDirection);
+            }
 
             var totalCount = await query.CountAsync(cancellationToken);
 

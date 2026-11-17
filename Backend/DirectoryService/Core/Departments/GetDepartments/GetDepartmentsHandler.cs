@@ -31,6 +31,15 @@ namespace Core.Departments.GetDepartments
             if (!Enum.TryParse<SortDirection>(command.SortDirection, out var parsedSortDirection))
                 return Result.Failure<PagedResult<DepartmentListItemDto>, AppError>(AppError.Validation("departments.sortDirection", "Invalid sort direction"));
 
+            if (command.Page < 1)
+                return Result.Failure<PagedResult<DepartmentListItemDto>, AppError>(AppError.Validation("departments.page", "Page must be greater than 0"));
+
+            if (command.PageSize < 1)
+                return Result.Failure<PagedResult<DepartmentListItemDto>, AppError>(AppError.Validation("departments.pageSize", "Page size must be greater than 0"));
+
+            if (command.PageSize > 100)
+                return Result.Failure<PagedResult<DepartmentListItemDto>, AppError>(AppError.Validation("departments.pageSize", "Page size must be less than or equal to 100"));
+
             return await _departmentReadRepository.GetAllAsync(command.Search, sortField, parsedSortDirection, command.Page, command.PageSize, cancellationToken);
         }
     }
