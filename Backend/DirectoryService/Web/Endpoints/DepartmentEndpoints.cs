@@ -3,6 +3,7 @@ using Core.Departments.AddDepartmentLocation;
 using Core.Departments.AddDepartmentPosition;
 using Core.Departments.CreateDepartment;
 using Core.Departments.DeleteDepartment;
+using Core.Departments.GetDepartment;
 using Core.Departments.RemoveDepartmentLocation;
 using Core.Departments.RemoveDepartmentPosition;
 using Core.Departments.UpdateDepartment;
@@ -35,9 +36,9 @@ namespace Web.Endpoints
             return EndpointResult.Empty;
         }
 
-        private static async Task<EndpointResult> GetByIdAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+        private static async Task<EndpointResult<DepartmentDto>> GetByIdAsync([FromRoute] Guid id, [FromServices] ICommandHandler<DepartmentDto, GetDepartmentCommand> handler, CancellationToken cancellationToken)
         {
-            return EndpointResult.Empty;
+            return await handler.HandlerAsync(new GetDepartmentCommand(id), cancellationToken);
         }
 
         private static async Task<CreatedEndpointResult<Guid>> CreateAsync([FromBody] CreateDepartmentDto departmentDto, [FromServices] ICommandHandler<Guid, CreateDepartmentCommand> handler, CancellationToken cancellationToken)

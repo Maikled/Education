@@ -23,6 +23,9 @@ namespace Infrastructure.Postgres
             services.AddScoped<IDepartmentPositionsRepository, DepartmentPositionsRepository>();
             services.AddScoped<IPositionsRepository, PositionsRepository>();
 
+            services.AddScoped<IDepartmentReadRepository, DepartmentReadRepository>();
+            services.AddScoped<ILocationReadRepository, LocationReadRepository>();
+
             return services;
         }
     }

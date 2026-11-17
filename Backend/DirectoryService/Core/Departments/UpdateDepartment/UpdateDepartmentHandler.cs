@@ -1,5 +1,4 @@
-﻿using Contracts.DTOs;
-using Contracts.Errors;
+﻿using Contracts.Errors;
 using Core.Departments.Interfaces;
 using Core.Interfaces;
 using CSharpFunctionalExtensions;

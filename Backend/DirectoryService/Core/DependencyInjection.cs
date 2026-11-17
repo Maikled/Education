@@ -4,12 +4,14 @@ using Core.Departments.AddDepartmentLocation;
 using Core.Departments.AddDepartmentPosition;
 using Core.Departments.CreateDepartment;
 using Core.Departments.DeleteDepartment;
+using Core.Departments.GetDepartment;
 using Core.Departments.RemoveDepartmentLocation;
 using Core.Departments.RemoveDepartmentPosition;
 using Core.Departments.UpdateDepartment;
 using Core.Interfaces;
 using Core.Locations.CreateLocation;
 using Core.Locations.DeleteLocation;
+using Core.Locations.GetLocation;
 using Core.Locations.UpdateLocation;
 using Core.Positions.CreatePosition;
 using Core.Positions.DeletePosition;
@@ -37,10 +39,12 @@ namespace Core
             services.AddScoped<ICommandHandler<RemoveDepartmentLocationCommand>, RemoveDepartmentLocationHandler>();
             services.AddScoped<ICommandHandler<AddDepartmentPositionCommand>, AddDepartmentPositionHandler>();
             services.AddScoped<ICommandHandler<RemoveDepartmentPositionCommand>, RemoveDepartmentPositionHandler>();
+            services.AddScoped<ICommandHandler<DepartmentDto, GetDepartmentCommand>, GetDepartmentHandler>();
 
             services.AddScoped<ICommandHandler<Guid, CreateLocationCommand>, CreateLocationHandler>();
             services.AddScoped<ICommandHandler<UpdateLocationCommand>, UpdateLocationHandler>();
             services.AddScoped<ICommandHandler<DeleteLocationCommand>, DeleteLocationHandler>();
+            services.AddScoped<ICommandHandler<LocationDto, GetLocationCommand>, GetLocationHandler>();
 
             services.AddScoped<ICommandHandler<Guid, CreatePositionCommand>, CreatePositionHandler>();
             services.AddScoped<ICommandHandler<UpdatePositionCommand>, UpdatePositionHandler>();
