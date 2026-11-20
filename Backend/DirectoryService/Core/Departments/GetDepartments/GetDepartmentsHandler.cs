@@ -23,13 +23,13 @@ namespace Core.Departments.GetDepartments
             DepartmentSortFields? sortField = null;
             if (!string.IsNullOrWhiteSpace(command.SortField))
             {
-                if (!Enum.TryParse<DepartmentSortFields>(command.SortField, out var parsedSortField))
+                if (!Enum.TryParse<DepartmentSortFields>(command.SortField, true, out var parsedSortField))
                     return Result.Failure<PagedResult<DepartmentListItemDto>, AppError>(AppError.Validation("departments.sortField", "Invalid sort field"));
                 
                 sortField = parsedSortField;
             }
 
-            if (!Enum.TryParse<SortDirection>(command.SortDirection, out var parsedSortDirection))
+            if (!Enum.TryParse<SortDirection>(command.SortDirection, true, out var parsedSortDirection))
                 return Result.Failure<PagedResult<DepartmentListItemDto>, AppError>(AppError.Validation("departments.sortDirection", "Invalid sort direction"));
 
             if (command.Page < 1)

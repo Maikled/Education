@@ -23,13 +23,13 @@ namespace Core.Locations.GetLocations
             LocationSortFields? sortField = null;
             if (!string.IsNullOrWhiteSpace(command.SortField))
             {
-                if (!Enum.TryParse<LocationSortFields>(command.SortField, out var parsedSortField))
+                if (!Enum.TryParse<LocationSortFields>(command.SortField, true, out var parsedSortField))
                     return Result.Failure<PagedResult<LocationListItemDto>, AppError>(AppError.Validation("locations.sortField", "Invalid sort field"));
 
                 sortField = parsedSortField;
             }
 
-            if (!Enum.TryParse<SortDirection>(command.SortDirection, out var parsedSortDirection))
+            if (!Enum.TryParse<SortDirection>(command.SortDirection, true, out var parsedSortDirection))
                 return Result.Failure<PagedResult<LocationListItemDto>, AppError>(AppError.Validation("locations.sortDirection", "Invalid sort direction"));
 
             if (command.MinDepartments < 0)
