@@ -1,4 +1,4 @@
-﻿namespace Core.Departments.GetDepartments.Enums
+﻿namespace Core.Enums
 {
     public enum SortDirection
     {

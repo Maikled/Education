@@ -6,7 +6,7 @@ using CSharpFunctionalExtensions;
 
 namespace Core.Locations.TopLocations
 {
-    internal class GetTopLocationHandler : ICommandHandler<IEnumerable<TopLocationDTO>, GetTopLocationCommand>
+    internal class GetTopLocationHandler : ICommandHandler<IEnumerable<TopLocationDto>, GetTopLocationCommand>
     {
         private readonly ILocationReadRepository _locationReadRepository;
 
@@ -15,11 +15,11 @@ namespace Core.Locations.TopLocations
             _locationReadRepository = locationReadRepository;
         }
 
-        public async Task<Result<IEnumerable<TopLocationDTO>, AppError>> HandlerAsync(GetTopLocationCommand command, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<TopLocationDto>, AppError>> HandlerAsync(GetTopLocationCommand command, CancellationToken cancellationToken)
         {
             var topLocations = await _locationReadRepository.GetTopLocationsAsync(command.Limit, cancellationToken);
 
-            return Result.Success<IEnumerable<TopLocationDTO>, AppError>(topLocations);
+            return Result.Success<IEnumerable<TopLocationDto>, AppError>(topLocations);
         }
     }
 }

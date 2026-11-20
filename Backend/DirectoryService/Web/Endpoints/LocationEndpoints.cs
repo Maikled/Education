@@ -1,8 +1,10 @@
-﻿using Contracts.DTOs;
+﻿using Contracts;
+using Contracts.DTOs;
 using Core.Interfaces;
 using Core.Locations.CreateLocation;
 using Core.Locations.DeleteLocation;
 using Core.Locations.GetLocation;
+using Core.Locations.GetLocations;
 using Core.Locations.TopLocations;
 using Core.Locations.UpdateLocation;
 using Microsoft.AspNetCore.Mvc;
@@ -25,9 +27,9 @@ namespace Web.Endpoints
             group.MapDelete("/{id:guid}", DeleteAsync);
         }
 
-        private static async Task<EndpointResult> GetAllAsync(CancellationToken cancellationToken)
+        private static async Task<EndpointResult<PagedResult<LocationListItemDto>>> GetAllAsync([AsParameters] GetLocationsDto getLocationsDto, [FromServices] ICommandHandler<PagedResult<LocationListItemDto>, GetLocationsCommand> handler, CancellationToken cancellationToken)
         {
-            return EndpointResult.Empty;
+            return await handler.HandlerAsync(new GetLocationsCommand(getLocationsDto.Search, getLocationsDto.MinDepartments, getLocationsDto.SortField, getLocationsDto.SortDirection, getLocationsDto.Page, getLocationsDto.PageSize), cancellationToken);
         }
 
         private static async Task<EndpointResult<LocationDto>> GetByIdAsync([FromRoute] Guid id, [FromServices] ICommandHandler<LocationDto, GetLocationCommand> handler, CancellationToken cancellationToken)
@@ -35,7 +37,7 @@ namespace Web.Endpoints
             return await handler.HandlerAsync(new GetLocationCommand(id), cancellationToken);
         }
 
-        private static async Task<EndpointResult<IEnumerable<TopLocationDTO>>> GetTopAsync([FromServices] ICommandHandler<IEnumerable<TopLocationDTO>, GetTopLocationCommand> handler, CancellationToken cancellationToken)
+        private static async Task<EndpointResult<IEnumerable<TopLocationDto>>> GetTopAsync([FromServices] ICommandHandler<IEnumerable<TopLocationDto>, GetTopLocationCommand> handler, CancellationToken cancellationToken)
         {
             return await handler.HandlerAsync(new GetTopLocationCommand(5), cancellationToken);
         }
