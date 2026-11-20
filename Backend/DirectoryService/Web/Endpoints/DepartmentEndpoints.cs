@@ -4,6 +4,7 @@ using Core.Departments.AddDepartmentPosition;
 using Core.Departments.CreateDepartment;
 using Core.Departments.DeleteDepartment;
 using Core.Departments.GetDepartment;
+using Core.Departments.GetDepartments;
 using Core.Departments.RemoveDepartmentLocation;
 using Core.Departments.RemoveDepartmentPosition;
 using Core.Departments.UpdateDepartment;
@@ -31,9 +32,9 @@ namespace Web.Endpoints
             group.MapDelete("/{departmentId:guid}/positions/{positionId:guid}", RemovePositionFromDepartmentAsync);
         }
 
-        private static async Task<EndpointResult> GetAllAsync(CancellationToken cancellationToken)
+        private static async Task<EndpointResult<PagedResult<DepartmentListItemDto>>> GetAllAsync([AsParameters] GetDepartmentsDto getDepartmentsDto, [FromServices] ICommandHandler<PagedResult<DepartmentListItemDto>, GetDepartmentsCommand> handler, CancellationToken cancellationToken)
         {
-            return EndpointResult.Empty;
+            return await handler.HandlerAsync(new GetDepartmentsCommand(getDepartmentsDto.Search, getDepartmentsDto.SortField, getDepartmentsDto.SortDirection, getDepartmentsDto.Page, getDepartmentsDto.PageSize), cancellationToken);
         }
 
         private static async Task<EndpointResult<DepartmentDto>> GetByIdAsync([FromRoute] Guid id, [FromServices] ICommandHandler<DepartmentDto, GetDepartmentCommand> handler, CancellationToken cancellationToken)

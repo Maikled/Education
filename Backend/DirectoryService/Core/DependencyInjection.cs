@@ -1,10 +1,12 @@
-﻿using Contracts.DTOs;
+﻿using Contracts;
+using Contracts.DTOs;
 using Core.Decorators;
 using Core.Departments.AddDepartmentLocation;
 using Core.Departments.AddDepartmentPosition;
 using Core.Departments.CreateDepartment;
 using Core.Departments.DeleteDepartment;
 using Core.Departments.GetDepartment;
+using Core.Departments.GetDepartments;
 using Core.Departments.RemoveDepartmentLocation;
 using Core.Departments.RemoveDepartmentPosition;
 using Core.Departments.UpdateDepartment;
@@ -41,6 +43,7 @@ namespace Core
             services.AddScoped<ICommandHandler<AddDepartmentPositionCommand>, AddDepartmentPositionHandler>();
             services.AddScoped<ICommandHandler<RemoveDepartmentPositionCommand>, RemoveDepartmentPositionHandler>();
             services.AddScoped<ICommandHandler<DepartmentDto, GetDepartmentCommand>, GetDepartmentHandler>();
+            services.AddScoped<ICommandHandler<PagedResult<DepartmentListItemDto>, GetDepartmentsCommand>, GetDepartmentsHandler>();
 
             services.AddScoped<ICommandHandler<Guid, CreateLocationCommand>, CreateLocationHandler>();
             services.AddScoped<ICommandHandler<UpdateLocationCommand>, UpdateLocationHandler>();
