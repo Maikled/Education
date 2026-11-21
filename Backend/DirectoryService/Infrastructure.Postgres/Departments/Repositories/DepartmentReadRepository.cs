@@ -33,20 +33,22 @@ namespace Infrastructure.Postgres.Departments.Repositories
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(p => EF.Functions.ILike(p.Name.Value, $"%{search}%"));
 
-            if (sortFields.HasValue)
+            Expression<Func<Department, object>> expression = sortFields.HasValue ? sortFields.Value switch
             {
-                query = sortFields.Value switch
-                {
-                    DepartmentSortFields.Name => OrderBySortDirection(query, p => p.Name.Value, sortDirection),
-                    DepartmentSortFields.Slug => OrderBySortDirection(query, p => p.Slug.Value, sortDirection),
-                    DepartmentSortFields.CreatedAt => OrderBySortDirection(query, p => p.CreatedAt, sortDirection),
-                    DepartmentSortFields.ParentId => OrderBySortDirection(query, p => p.ParentId, sortDirection),
-                    _ => query
-                };
+                DepartmentSortFields.Name => p => p.Name.Value,
+                DepartmentSortFields.Slug => p => p.Slug.Value,
+                DepartmentSortFields.CreatedAt => p => p.CreatedAt,
+                DepartmentSortFields.ParentId => p => p.ParentId,
+                _ => p => p.CreatedAt
+            } : p => p.CreatedAt;
+
+            if (sortDirection == SortDirection.Ascending)
+            {
+                query = query.OrderBy(expression);
             }
             else
             {
-                query = OrderBySortDirection(query, p => p.Name.Value, sortDirection);
+                query = query.OrderByDescending(expression);
             }
 
             var totalCount = await query.CountAsync(cancellationToken);
@@ -56,11 +58,6 @@ namespace Infrastructure.Postgres.Departments.Repositories
             var results = await query.Select(p => new DepartmentListItemDto(p.Id, p.Name.Value, p.Slug.Value, p.Path.Value, p.CreatedAt)).ToListAsync(cancellationToken);
 
             return new PagedResult<DepartmentListItemDto>(results, totalCount, page, pageSize);
-        }
-
-        private static IQueryable<Department> OrderBySortDirection<TValue>(IQueryable<Department> query, Expression<Func<Department, TValue>> keySelector, SortDirection sortDirection)
-        {
-            return sortDirection == SortDirection.Ascending ? query.OrderBy(keySelector) : query.OrderByDescending(keySelector);
         }
     }
 }
