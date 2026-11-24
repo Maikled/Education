@@ -1,4 +1,5 @@
 ﻿using Contracts.Errors.Enums;
+using System.Text.Json.Serialization;
 
 namespace Contracts.Errors
 {
@@ -8,6 +9,7 @@ namespace Contracts.Errors
         public AppErrorType Type { get; init; }
         public string Message { get; init; }
 
+        [JsonConstructor]
         private AppError(string code, AppErrorType type, string message)
         {
             Code = code;
