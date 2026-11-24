@@ -36,6 +36,10 @@ namespace Core.Departments.CreateDepartment
             if (departmentsSlugResult.IsFailure)
                 return departmentsSlugResult.Error;
 
+            var locationsValidationResult = ValidateLocations(command.CreateDepartmentDto.Locations);
+            if (locationsValidationResult.IsFailure)
+                return locationsValidationResult.Error;
+
             var beginTransactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
             if (beginTransactionResult.IsFailure)
                 return beginTransactionResult.Error;
@@ -63,13 +67,14 @@ namespace Core.Departments.CreateDepartment
             if (departmentResult.IsFailure)
                 return departmentResult.Error;
 
-            if (command.CreateDepartmentDto.locationsIds != null)
+            var locations = command.CreateDepartmentDto.Locations?.ToList();
+            if (locations != null)
             {
-                var locationsExists = await _locationsRepository.ExistAll(command.CreateDepartmentDto.locationsIds, cancellationToken);
+                var locationsExists = await _locationsRepository.ExistAll(locations.Select(p => p.LocationId), cancellationToken);
                 if (!locationsExists)
                     return AppError.NotFound("locations", "One or more locations not found.");
 
-                var departmentLocationResults = command.CreateDepartmentDto.locationsIds.Select(p => DepartmentLocation.Create(departmentResult.Value.Id, p, !command.CreateDepartmentDto.ParentId.HasValue)).ToList();
+                var departmentLocationResults = locations.Select(p => DepartmentLocation.Create(departmentResult.Value.Id, p.LocationId, p.IsPrimary)).ToList();
                 if (departmentLocationResults.Any(p => p.IsFailure))
                     return AppError.FromErrors(departmentLocationResults.Where(p => p.IsFailure).Select(p => p.Error).ToArray());
 
@@ -92,6 +97,26 @@ namespace Core.Departments.CreateDepartment
             LogDepartmentCreated(departmentResult.Value.Id, command.CreateDepartmentDto.ParentId);
 
             return departmentResult.Value.Id;
+        }
+
+        /// <summary>
+        /// Основной может быть не более одна локация подразделения (ux_department_location_primary),
+        /// а одна и та же локация не может быть привязана дважды (ux_department_location_department_location).
+        /// </summary>
+        private static UnitResult<AppError> ValidateLocations(IEnumerable<CreateDepartmentLocationDto>? locations)
+        {
+            if (locations == null)
+                return UnitResult.Success<AppError>();
+
+            var locationsList = locations.ToList();
+
+            if (locationsList.Count(p => p.IsPrimary) > 1)
+                return AppError.Validation("department.locations", "Only one location can be primary.");
+
+            if (locationsList.Select(p => p.LocationId).Distinct().Count() != locationsList.Count)
+                return AppError.Validation("department.locations", "Locations must not contain duplicates.");
+
+            return UnitResult.Success<AppError>();
         }
 
         [LoggerMessage(Level = LogLevel.Information, Message = "Department {DepartmentId} created with parent {ParentId}")]

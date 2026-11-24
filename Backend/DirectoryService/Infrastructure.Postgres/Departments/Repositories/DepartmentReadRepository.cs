@@ -31,12 +31,14 @@ namespace Infrastructure.Postgres.Departments.Repositories
             var query = _queryDepartments;
 
             if (!string.IsNullOrWhiteSpace(search))
-                query = query.Where(p => EF.Functions.ILike(p.Name.Value, $"%{search}%"));
+                // Name хранится через value converter: обращение к .Value не транслируется в SQL,
+                // поэтому приводим свойство к типу колонки (string)
+                query = query.Where(p => EF.Functions.ILike((string)(object)p.Name, $"%{search}%"));
 
             Expression<Func<Department, object>> expression = sortFields.HasValue ? sortFields.Value switch
             {
-                DepartmentSortFields.Name => p => p.Name.Value,
-                DepartmentSortFields.Slug => p => p.Slug.Value,
+                DepartmentSortFields.Name => p => p.Name,
+                DepartmentSortFields.Slug => p => p.Slug,
                 DepartmentSortFields.CreatedAt => p => p.CreatedAt,
                 DepartmentSortFields.ParentId => p => p.ParentId,
                 _ => p => p.CreatedAt

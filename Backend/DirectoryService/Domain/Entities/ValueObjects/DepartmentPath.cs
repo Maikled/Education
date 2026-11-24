@@ -5,6 +5,8 @@ namespace Domain.Entities.ValueObjects
 {
     public record DepartmentPath
     {
+        private const char SEPARATOR = '/';
+
         public string Value { get; }
 
         private DepartmentPath(string value)
@@ -19,6 +21,25 @@ namespace Domain.Entities.ValueObjects
                 return validationResult.ConvertFailure<DepartmentPath>();
 
             return new DepartmentPath(slug.Value);
+        }
+
+        /// <summary>
+        /// Восстанавливает путь из строки вида "root/child/grandchild" (например, при чтении из БД).
+        /// Каждый сегмент должен быть корректным slug.
+        /// </summary>
+        public static Result<DepartmentPath, AppError> FromValue(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return AppError.Validation("departmentPath.value", "Path cannot be null or empty.");
+
+            foreach (var segment in value.Split(SEPARATOR))
+            {
+                var segmentResult = Slug.Create(segment);
+                if (segmentResult.IsFailure)
+                    return segmentResult.Error;
+            }
+
+            return new DepartmentPath(value);
         }
 
         public Result<DepartmentPath, AppError> AppendPath(Slug slug)
