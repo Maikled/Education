@@ -16,14 +16,14 @@
             await TestsFactory.ResetDatabaseAsync();
         }
 
-        public ValueTask InitializeAsync()
-        {
-            return ValueTask.CompletedTask;
-        }
-
-        public async ValueTask DisposeAsync()
+        public async ValueTask InitializeAsync()
         {
             await ResetDatabaseAsync();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return ValueTask.CompletedTask;
         }
     }
 }
