@@ -1,5 +1,3 @@
-using Infrastructure.Postgres;
-using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Globalization;
@@ -8,7 +6,7 @@ using Web.Providers;
 
 namespace Web
 {
-    internal static class Program
+    public class Program
     {
         public static async Task Main(string[] args)
         {

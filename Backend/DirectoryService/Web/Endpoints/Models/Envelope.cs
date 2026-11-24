@@ -2,9 +2,9 @@
 
 namespace Web.Endpoints.Models
 {
-    internal record Envelope<TValue>(TValue? Result, AppError? Error)
+    public record Envelope<TValue>(TValue? Result, AppError? Error)
     {
-        public DateTime GeneratedAt { get; } = DateTime.UtcNow;
+        public DateTime GeneratedAt { get; init; } = DateTime.UtcNow;
     }
 
     internal static class Envelope

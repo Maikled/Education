@@ -38,7 +38,7 @@ namespace Infrastructure.Postgres.Configurations
                 .HasColumnName("slug");
 
             builder.Property(p => p.Path)
-                .HasConversion(p => p.Value, value => DepartmentPath.Create(Slug.Create(value).Value).Value)
+                .HasConversion(p => p.Value, value => DepartmentPath.FromValue(value).Value)
                 .IsRequired()
                 .HasColumnName("path");
 
