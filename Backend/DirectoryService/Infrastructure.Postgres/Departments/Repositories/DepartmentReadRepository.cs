@@ -2,6 +2,7 @@ using Contracts;
 using Contracts.DTOs;
 using Core.Departments.GetDepartments.Enums;
 using Core.Departments.Interfaces;
+using Core.Enums;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -25,7 +26,7 @@ namespace Infrastructure.Postgres.Departments.Repositories
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<PagedResult<DepartmentListItemDto>> GetAllAsync(string? search, SortFields? sortFields, SortDirection sortDirection, int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<PagedResult<DepartmentListItemDto>> GetDepartmentsAsync(string? search, DepartmentSortFields? sortFields, SortDirection sortDirection, int page, int pageSize, CancellationToken cancellationToken)
         {
             var query = _queryDepartments;
 
@@ -36,10 +37,10 @@ namespace Infrastructure.Postgres.Departments.Repositories
             {
                 query = sortFields.Value switch
                 {
-                    SortFields.Name => OrderBySortDirection(query, p => p.Name.Value, sortDirection),
-                    SortFields.Slug => OrderBySortDirection(query, p => p.Slug.Value, sortDirection),
-                    SortFields.CreatedAt => OrderBySortDirection(query, p => p.CreatedAt, sortDirection),
-                    SortFields.ParentId => OrderBySortDirection(query, p => p.ParentId, sortDirection),
+                    DepartmentSortFields.Name => OrderBySortDirection(query, p => p.Name.Value, sortDirection),
+                    DepartmentSortFields.Slug => OrderBySortDirection(query, p => p.Slug.Value, sortDirection),
+                    DepartmentSortFields.CreatedAt => OrderBySortDirection(query, p => p.CreatedAt, sortDirection),
+                    DepartmentSortFields.ParentId => OrderBySortDirection(query, p => p.ParentId, sortDirection),
                     _ => query
                 };
             }

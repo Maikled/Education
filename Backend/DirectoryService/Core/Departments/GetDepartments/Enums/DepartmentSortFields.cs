@@ -1,6 +1,6 @@
 ﻿namespace Core.Departments.GetDepartments.Enums
 {
-    public enum SortFields
+    public enum DepartmentSortFields
     {
         Name,
         Slug,
